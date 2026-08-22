@@ -10,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.Settings;
 import android.view.View;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
@@ -21,6 +20,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,6 +40,9 @@ public class DetailActivity extends Activity {
     private String htmlRelPath;
     private boolean isFavorite = false;
     private SharedPreferences prefs;
+
+    private static final String VIRTUAL_HOST = "app.pinout";
+    private static final String VIRTUAL_BASE_URL = "https://" + VIRTUAL_HOST + "/";
 
     private static final String[] CANDIDATE_DATA_DIRS = new String[]{
         "/storage/emulated/0/PinOut2/data/",
@@ -101,7 +104,9 @@ public class DetailActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadPinoutContent();
+        if (hasStoragePermission()) {
+            loadPinoutContent();
+        }
     }
 
     private void updateFavButton() {
@@ -133,12 +138,17 @@ public class DetailActivity extends Activity {
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                if (url != null && url.startsWith("pinout://request_permission")) {
-                    requestStoragePermission();
-                    return true;
-                } else if (url != null && url.startsWith("pinout://refresh")) {
-                    loadPinoutContent();
-                    return true;
+                if (url != null) {
+                    if (url.startsWith("pinout://request_permission")) {
+                        requestStoragePermission();
+                        return true;
+                    } else if (url.startsWith("pinout://refresh")) {
+                        loadPinoutContent();
+                        return true;
+                    } else if (url.startsWith(VIRTUAL_BASE_URL)) {
+                        view.loadUrl(url);
+                        return true;
+                    }
                 }
                 return super.shouldOverrideUrlLoading(view, url);
             }
@@ -146,7 +156,8 @@ public class DetailActivity extends Activity {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 if (request != null && request.getUrl() != null) {
-                    return handleResource(request.getUrl());
+                    WebResourceResponse response = handleVirtualResource(request.getUrl());
+                    if (response != null) return response;
                 }
                 return super.shouldInterceptRequest(view, request);
             }
@@ -154,34 +165,106 @@ public class DetailActivity extends Activity {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
                 if (url != null) {
-                    return handleResource(Uri.parse(url));
+                    WebResourceResponse response = handleVirtualResource(Uri.parse(url));
+                    if (response != null) return response;
                 }
                 return super.shouldInterceptRequest(view, url);
             }
 
-            private WebResourceResponse handleResource(Uri uri) {
-                if (uri == null) return null;
-                String scheme = uri.getScheme();
-                if ("file".equalsIgnoreCase(scheme)) {
-                    String path = uri.getPath();
-                    if (path != null) {
-                        File f = new File(path);
-                        if (f.exists() && f.isFile()) {
-                            try {
-                                String mime = getMimeType(f.getName());
-                                return new WebResourceResponse(mime, "UTF-8", new FileInputStream(f));
-                            } catch (Exception ignored) {}
-                        }
-                    }
-                }
-                return null;
-            }
-
             @Override
             public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                // Suppress default Android error page
+                // Suppress Android default error page
             }
         });
+    }
+
+    private WebResourceResponse handleVirtualResource(Uri uri) {
+        if (uri == null) return null;
+        String host = uri.getHost();
+        if (VIRTUAL_HOST.equalsIgnoreCase(host)) {
+            String path = uri.getPath();
+            if (path == null || path.isEmpty() || path.equals("/")) return null;
+            if (path.startsWith("/")) path = path.substring(1);
+
+            File file = findFile(path);
+            if (file != null && file.exists() && file.isFile()) {
+                try {
+                    String mime = getMimeType(file.getName());
+                    if (mime.equals("text/html")) {
+                        byte[] bytes = readFileBytes(file);
+                        String charset = detectCharset(bytes);
+                        String html = new String(bytes, charset);
+
+                        String css = "<style>" +
+                                     "body { background-color: #0F172A !important; color: #E2E8F0 !important; font-family: -apple-system, Roboto, sans-serif !important; padding: 14px !important; line-height: 1.6 !important; } " +
+                                     "a { color: #38BDF8 !important; text-decoration: none !important; } " +
+                                     "img { max-width: 100% !important; height: auto !important; border-radius: 10px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.6) !important; margin: 14px auto !important; display: block !important; background: #1E293B !important; } " +
+                                     "table { width: 100% !important; border-collapse: collapse !important; margin: 14px 0 !important; background: #1E293B !important; border-radius: 10px !important; overflow: hidden !important; border: 1px solid #334155 !important; } " +
+                                     "th, td { padding: 10px 12px !important; border: 1px solid #334155 !important; font-size: 13px !important; } " +
+                                     "th { background-color: #334155 !important; color: #38BDF8 !important; font-weight: bold !important; } " +
+                                     "h1, h2, h3 { color: #60A5FA !important; } " +
+                                     "#de_controlpanel, .de_controlpanel, #header, #footer_bottom { display: none !important; } " +
+                                     "</style>" +
+                                     "<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'>";
+
+                        if (html.contains("<head>")) {
+                            html = html.replace("<head>", "<head>" + css);
+                        } else {
+                            html = css + html;
+                        }
+
+                        byte[] outBytes = html.getBytes("UTF-8");
+                        return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream(outBytes));
+                    } else {
+                        return new WebResourceResponse(mime, null, new FileInputStream(file));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                // If CSS/JS not found, return empty dummy to avoid breaking page
+                String mime = getMimeType(path);
+                if (mime.equals("text/css") || mime.equals("application/javascript")) {
+                    return new WebResourceResponse(mime, "UTF-8", new ByteArrayInputStream(new byte[0]));
+                }
+            }
+        }
+        return null;
+    }
+
+    private File findFile(String relPath) {
+        if (relPath == null || relPath.isEmpty()) return null;
+        while (relPath.startsWith("/")) relPath = relPath.substring(1);
+
+        for (String baseDir : CANDIDATE_DATA_DIRS) {
+            File f = new File(baseDir, relPath);
+            if (f.exists() && f.isFile()) {
+                return f;
+            }
+        }
+        return null;
+    }
+
+    private byte[] readFileBytes(File file) throws Exception {
+        FileInputStream fis = new FileInputStream(file);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        byte[] buf = new byte[8192];
+        int len;
+        while ((len = fis.read(buf)) != -1) {
+            baos.write(buf, 0, len);
+        }
+        fis.close();
+        return baos.toByteArray();
+    }
+
+    private String detectCharset(byte[] bytes) {
+        try {
+            String rawHeader = new String(bytes, 0, Math.min(bytes.length, 1024), "ISO-8859-1");
+            if (rawHeader.toLowerCase().contains("windows-1251")) {
+                return "windows-1251";
+            }
+        } catch (Exception ignored) {}
+        return "UTF-8";
     }
 
     private String getMimeType(String filename) {
@@ -243,59 +326,15 @@ public class DetailActivity extends Activity {
             return;
         }
 
-        File targetFile = null;
-        for (String candidate : CANDIDATE_DATA_DIRS) {
-            File f = new File(candidate, htmlRelPath);
-            if (f.exists()) {
-                targetFile = f;
-                break;
-            }
-        }
+        String path = htmlRelPath;
+        while (path.startsWith("/")) path = path.substring(1);
 
+        File targetFile = findFile(path);
         if (targetFile != null && targetFile.exists()) {
-            try {
-                FileInputStream fis = new FileInputStream(targetFile);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                byte[] buf = new byte[8192];
-                int len;
-                while ((len = fis.read(buf)) != -1) {
-                    baos.write(buf, 0, len);
-                }
-                fis.close();
-                byte[] bytes = baos.toByteArray();
-
-                String rawHeader = new String(bytes, 0, Math.min(bytes.length, 1024), "ISO-8859-1");
-                String charset = "UTF-8";
-                if (rawHeader.toLowerCase().contains("windows-1251")) {
-                    charset = "windows-1251";
-                }
-
-                String htmlContent = new String(bytes, charset);
-
-                String css = "<style>" +
-                             "body { background-color: #0F172A !important; color: #E2E8F0 !important; font-family: -apple-system, Roboto, sans-serif !important; padding: 14px !important; line-height: 1.6 !important; } " +
-                             "a { color: #38BDF8 !important; text-decoration: none !important; } " +
-                             "img { max-width: 100% !important; height: auto !important; border-radius: 10px !important; box-shadow: 0 4px 10px rgba(0,0,0,0.6) !important; margin: 14px auto !important; display: block !important; background: #1E293B !important; } " +
-                             "table { width: 100% !important; border-collapse: collapse !important; margin: 14px 0 !important; background: #1E293B !important; border-radius: 10px !important; overflow: hidden !important; border: 1px solid #334155 !important; } " +
-                             "th, td { padding: 10px 12px !important; border: 1px solid #334155 !important; font-size: 13px !important; } " +
-                             "th { background-color: #334155 !important; color: #38BDF8 !important; font-weight: bold !important; } " +
-                             "h1, h2, h3 { color: #60A5FA !important; } " +
-                             "</style>" +
-                             "<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'>";
-
-                if (htmlContent.contains("<head>")) {
-                    htmlContent = htmlContent.replace("<head>", "<head>" + css);
-                } else {
-                    htmlContent = css + htmlContent;
-                }
-
-                String baseUrl = "file://" + targetFile.getParent() + "/";
-                webView.loadDataWithBaseURL(baseUrl, htmlContent, "text/html", "UTF-8", null);
-            } catch (Exception e) {
-                showError("Erreur lors de la lecture du fichier : " + e.getMessage());
-            }
+            String virtualUrl = VIRTUAL_BASE_URL + path;
+            webView.loadUrl(virtualUrl);
         } else {
-            showError("Fichier de données introuvable : " + htmlRelPath + "<br><br>Vérifiez que le dossier <b>/sdcard/PinOut2/data/</b> est présent.");
+            showError("Fichier de données introuvable : " + htmlRelPath + "<br><br>Vérifiez que le dossier <b>/sdcard/PinOut2/data/</b> est bien présent.");
         }
     }
 
@@ -316,7 +355,7 @@ public class DetailActivity extends Activity {
                       "<p>Pour afficher les schémas et images des calculateurs (/sdcard/PinOut2), veuillez autoriser l'accès à tous les fichiers.</p>" +
                       "<a class='btn' href='pinout://request_permission'>Accorder la permission</a>" +
                       "</div></body></html>";
-        webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "UTF-8", null);
+        webView.loadDataWithBaseURL("https://app.pinout/", html, "text/html", "UTF-8", null);
     }
 
     private void showError(String msg) {
@@ -334,6 +373,6 @@ public class DetailActivity extends Activity {
                       "<p>" + msg + "</p>" +
                       "<a class='btn' href='pinout://refresh'>🔄 Réessayer</a>" +
                       "</div></body></html>";
-        webView.loadDataWithBaseURL("file:///android_asset/", html, "text/html", "UTF-8", null);
+        webView.loadDataWithBaseURL("https://app.pinout/", html, "text/html", "UTF-8", null);
     }
 }
