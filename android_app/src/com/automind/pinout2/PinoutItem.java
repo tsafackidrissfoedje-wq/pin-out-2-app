@@ -27,6 +27,7 @@ public class PinoutItem implements Serializable {
         }
 
         if (categoryFilter != null && !categoryFilter.isEmpty() && !categoryFilter.equals("ALL")) {
+            if (categoryFilter.equals("CFPM") && !source.equals("cfpm_gbe_auto")) return false;
             if (categoryFilter.equals("KTAG") && !source.equals("ktag_instruction")) return false;
             if (categoryFilter.equals("BENCH") && !source.equals("pcmktm_bench_module71")) return false;
             if (categoryFilter.equals("BOOT") && !source.equals("bsl_bootmode_tricore")) return false;

@@ -58,70 +58,16 @@
             android:textSize="13sp" />
     </LinearLayout>
 
-    <!-- Mode Switcher Tabs -->
+    <!-- Search Box -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="38dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_search"
         android:orientation="horizontal"
-        android:background="@drawable/bg_card_item"
-        android:padding="3dp"
+        android:gravity="center_vertical"
+        android:paddingLeft="12dp"
+        android:paddingRight="8dp"
         android:layout_marginBottom="10dp">
-
-        <Button
-            android:id="@+id/tab_cfpm"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_active"
-            android:text="🚗 CFPM GBE AUTO (934)"
-            android:textColor="@color/text_primary"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:textAllCaps="false"
-            android:layout_marginRight="4dp" />
-
-        <Button
-            android:id="@+id/tab_general"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@drawable/bg_chip_normal"
-            android:text="⚡ Catalogue Général (2813)"
-            android:textColor="@color/text_secondary"
-            android:textSize="11sp"
-            android:textAllCaps="false" />
-    </LinearLayout>
-
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
-
-        <!-- Mode 1: CFPM Interactive Web App (934 Calculateurs) -->
-        <WebView
-            android:id="@+id/wv_cfpm"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="visible" />
-
-        <!-- Mode 2: General Catalog (2813 Calculateurs) -->
-        <LinearLayout
-            android:id="@+id/ll_general_container"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <!-- Search Box -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_search"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingLeft="12dp"
-                android:paddingRight="8dp"
-                android:layout_marginBottom="10dp">
 
         <EditText
             android:id="@+id/et_search"
@@ -165,8 +111,21 @@
                 android:layout_width="wrap_content"
                 android:layout_height="34dp"
                 android:background="@drawable/bg_chip_active"
-                android:text="Tous (2813)"
+                android:text="Tous (3747)"
                 android:textColor="@color/text_primary"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                android:layout_marginRight="6dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp" />
+
+            <Button
+                android:id="@+id/chip_cfpm"
+                android:layout_width="wrap_content"
+                android:layout_height="34dp"
+                android:background="@drawable/bg_chip_normal"
+                android:text="CFPM GBE (934)"
+                android:textColor="@color/text_secondary"
                 android:textSize="11sp"
                 android:textAllCaps="false"
                 android:layout_marginRight="6dp"
@@ -429,7 +388,7 @@
         android:id="@+id/tv_count"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="2813 calculateurs trouvés"
+        android:text="3747 calculateurs trouvés"
         android:textColor="@color/text_secondary"
         android:textSize="12sp"
         android:layout_marginBottom="8dp"
@@ -467,9 +426,5 @@
             android:layout_gravity="center"
             android:visibility="gone" />
     </FrameLayout>
-
-        </LinearLayout> <!-- ll_general_container -->
-
-    </FrameLayout> <!-- content FrameLayout -->
 
 </LinearLayout>
