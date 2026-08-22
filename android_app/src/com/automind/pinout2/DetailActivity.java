@@ -195,6 +195,14 @@ public class DetailActivity extends Activity {
                         String charset = detectCharset(bytes);
                         String html = new String(bytes, charset);
 
+                        // 1. Remove any <base> tags that corrupt relative URLs in K-Tag / K-Suite
+                        html = html.replaceAll("(?i)<base[^>]*>", "");
+
+                        // 2. Fix any residual hardcoded Windows file:/// URLs in src or href attributes
+                        html = html.replaceAll("(?i)src=[\"'](?:file:///?[a-zA-Z]:/[^\"']*/|file:///[^\"']*/)([^\"']+)[\"']", "src=\"$1\"");
+                        html = html.replaceAll("(?i)href=[\"'](?:file:///?[a-zA-Z]:/[^\"']*/|file:///[^\"']*/)([^\"']+)[\"']", "href=\"$1\"");
+
+                        // 3. Inject responsive dark theme and auto-expand K-Tag accordions (.texter)
                         String css = "<style>" +
                                      "body { background-color: #0F172A !important; color: #E2E8F0 !important; font-family: -apple-system, Roboto, sans-serif !important; padding: 14px !important; line-height: 1.6 !important; } " +
                                      "a { color: #38BDF8 !important; text-decoration: none !important; } " +
@@ -203,6 +211,9 @@ public class DetailActivity extends Activity {
                                      "th, td { padding: 10px 12px !important; border: 1px solid #334155 !important; font-size: 13px !important; } " +
                                      "th { background-color: #334155 !important; color: #38BDF8 !important; font-weight: bold !important; } " +
                                      "h1, h2, h3 { color: #60A5FA !important; } " +
+                                     ".texter { display: block !important; } " +
+                                     "div[id^='a'], div[id^='b'], div[id^='c'], div[id^='d'] { display: block !important; } " +
+                                     ".border_big, .border_small { border: 1px solid #334155 !important; border-radius: 8px !important; padding: 10px !important; margin: 10px 0 !important; background: #1E293B !important; } " +
                                      "#de_controlpanel, .de_controlpanel, #header, #footer_bottom { display: none !important; } " +
                                      "</style>" +
                                      "<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes'>";
@@ -234,12 +245,30 @@ public class DetailActivity extends Activity {
 
     private File findFile(String relPath) {
         if (relPath == null || relPath.isEmpty()) return null;
+        try {
+            relPath = Uri.decode(relPath);
+        } catch (Exception ignored) {}
+
         while (relPath.startsWith("/")) relPath = relPath.substring(1);
 
         for (String baseDir : CANDIDATE_DATA_DIRS) {
             File f = new File(baseDir, relPath);
             if (f.exists() && f.isFile()) {
                 return f;
+            }
+
+            // Case-insensitive fallback for filename
+            File parent = f.getParentFile();
+            if (parent != null && parent.exists() && parent.isDirectory()) {
+                String targetName = f.getName();
+                File[] children = parent.listFiles();
+                if (children != null) {
+                    for (File child : children) {
+                        if (child.isFile() && child.getName().equalsIgnoreCase(targetName)) {
+                            return child;
+                        }
+                    }
+                }
             }
         }
         return null;
