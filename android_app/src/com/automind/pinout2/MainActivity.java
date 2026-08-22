@@ -17,19 +17,33 @@ import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends Activity {
+    private Button tabCfpm;
+    private Button tabGeneral;
+    private WebView wvCfpm;
+    private LinearLayout llGeneralContainer;
+
     private EditText etSearch;
     private TextView btnClear;
     private TextView tvCount;
@@ -128,6 +142,11 @@ public class MainActivity extends Activity {
     }
 
     private void initViews() {
+        tabCfpm = (Button) findViewById(R.id.tab_cfpm);
+        tabGeneral = (Button) findViewById(R.id.tab_general);
+        wvCfpm = (WebView) findViewById(R.id.wv_cfpm);
+        llGeneralContainer = (LinearLayout) findViewById(R.id.ll_general_container);
+
         etSearch = (EditText) findViewById(R.id.et_search);
         btnClear = (TextView) findViewById(R.id.btn_clear);
         tvCount = (TextView) findViewById(R.id.tv_count);
@@ -160,9 +179,153 @@ public class MainActivity extends Activity {
         brandFord = (Button) findViewById(R.id.brand_ford);
 
         brandButtons = new Button[]{brandAll, brandBosch, brandSiemens, brandDelphi, brandDenso, brandMarelli, brandPsa, brandVag, brandBmw, brandMercedes, brandRenault, brandFord};
+
+        setupCfpmWebView();
+    }
+
+    private void setupCfpmWebView() {
+        WebSettings settings = wvCfpm.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+        settings.setBuiltInZoomControls(true);
+        settings.setDisplayZoomControls(false);
+        settings.setSupportZoom(true);
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+        settings.setDefaultTextEncodingName("UTF-8");
+
+        wvCfpm.setBackgroundColor(Color.parseColor("#0F172A"));
+        wvCfpm.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                if (request != null && request.getUrl() != null) {
+                    WebResourceResponse resp = handleCfpmResource(request.getUrl());
+                    if (resp != null) return resp;
+                }
+                return super.shouldInterceptRequest(view, request);
+            }
+
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                if (url != null) {
+                    WebResourceResponse resp = handleCfpmResource(Uri.parse(url));
+                    if (resp != null) return resp;
+                }
+                return super.shouldInterceptRequest(view, url);
+            }
+        });
+
+        wvCfpm.loadUrl("https://app.pinout/cfpm/index.html");
+    }
+
+    private WebResourceResponse handleCfpmResource(Uri uri) {
+        if (uri == null) return null;
+        String host = uri.getHost();
+        if ("app.pinout".equalsIgnoreCase(host)) {
+            String path = uri.getPath();
+            if (path == null) return null;
+            while (path.startsWith("/")) path = path.substring(1);
+
+            // 1. Try loading from embedded assets (cfpm HTML, JS, CSS, JSON)
+            if (path.startsWith("cfpm/")) {
+                try {
+                    InputStream is = getAssets().open(path);
+                    String mime = getMimeType(path);
+                    return new WebResourceResponse(mime, "UTF-8", is);
+                } catch (Exception ignored) {}
+            }
+
+            // 2. Try loading images from storage
+            String imgRelPath = path;
+            if (imgRelPath.startsWith("cfpm/")) imgRelPath = imgRelPath.substring(5);
+
+            String[] candidateDirs = new String[]{
+                "/storage/emulated/0/PinOut2/data/assets/images/",
+                "/storage/emulated/0/PinOut2/assets/images/",
+                "/sdcard/PinOut2/data/assets/images/",
+                "/sdcard/PinOut2/assets/images/",
+                "/data/data/com.termux/files/home/pin-out-cfpm-gbe-auto-237/assets/images/",
+                "/storage/emulated/0/PinOut2/data/",
+                "/sdcard/PinOut2/data/"
+            };
+
+            String filename = new File(imgRelPath).getName();
+            for (String dir : candidateDirs) {
+                File imgFile = new File(dir, filename);
+                if (imgFile.exists() && imgFile.isFile()) {
+                    try {
+                        String mime = getMimeType(imgFile.getName());
+                        return new WebResourceResponse(mime, null, new FileInputStream(imgFile));
+                    } catch (Exception ignored) {}
+                }
+                File fullRel = new File(dir, imgRelPath);
+                if (fullRel.exists() && fullRel.isFile()) {
+                    try {
+                        String mime = getMimeType(fullRel.getName());
+                        return new WebResourceResponse(mime, null, new FileInputStream(fullRel));
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            // Dummy response for missing fonts/css
+            String mime = getMimeType(path);
+            if (mime.equals("text/css") || mime.equals("application/javascript")) {
+                return new WebResourceResponse(mime, "UTF-8", new ByteArrayInputStream(new byte[0]));
+            }
+        }
+        return null;
+    }
+
+    private String getMimeType(String filename) {
+        String lower = filename.toLowerCase();
+        if (lower.endsWith(".png")) return "image/png";
+        if (lower.endsWith(".jpg") || lower.endsWith(".jpeg")) return "image/jpeg";
+        if (lower.endsWith(".gif")) return "image/gif";
+        if (lower.endsWith(".svg")) return "image/svg+xml";
+        if (lower.endsWith(".css")) return "text/css";
+        if (lower.endsWith(".js")) return "application/javascript";
+        if (lower.endsWith(".htm") || lower.endsWith(".html")) return "text/html";
+        if (lower.endsWith(".json")) return "application/json";
+        return "application/octet-stream";
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (wvCfpm != null && wvCfpm.getVisibility() == View.VISIBLE && wvCfpm.canGoBack()) {
+            wvCfpm.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     private void setupEvents() {
+        tabCfpm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                wvCfpm.setVisibility(View.VISIBLE);
+                llGeneralContainer.setVisibility(View.GONE);
+                tabCfpm.setBackgroundResource(R.drawable.bg_chip_active);
+                tabCfpm.setTextColor(Color.parseColor("#F8FAFC"));
+                tabGeneral.setBackgroundResource(R.drawable.bg_chip_normal);
+                tabGeneral.setTextColor(Color.parseColor("#94A3B8"));
+            }
+        });
+
+        tabGeneral.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                wvCfpm.setVisibility(View.GONE);
+                llGeneralContainer.setVisibility(View.VISIBLE);
+                tabGeneral.setBackgroundResource(R.drawable.bg_chip_active);
+                tabGeneral.setTextColor(Color.parseColor("#F8FAFC"));
+                tabCfpm.setBackgroundResource(R.drawable.bg_chip_normal);
+                tabCfpm.setTextColor(Color.parseColor("#94A3B8"));
+            }
+        });
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0ea5e9">
+  <meta name="description" content="PIN OUT CFPM GBE AUTO 237 - Base de données professionnelle de schémas de raccordement, brochage de calculateurs moteur ECU/TCU/BCM, Bench Module 71, Bootloader BSL Tricore et BDM.">
+  <title>PIN OUT CFPM GBE AUTO 237 - Schémas & Brochages Calculateurs</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=2.1.4">
+  <link rel="manifest" href="manifest.json?v=2.1.4">
+  <link rel="icon" type="image/png" href="assets/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <a href="./index.html" class="brand-wrapper">
+        <img src="assets/icon-192.png" alt="CFPM GBE AUTO Logo" class="brand-logo">
+        <div class="brand-text">
+          <h1>PIN OUT CFPM GBE AUTO 237 <span class="badge-tag">PRO v2.0</span></h1>
+          <span class="brand-subtitle">Base de Données Électronique & Brochages Calculateurs Moteur (ECU / TCU / BCM)</span>
+        </div>
+      </a>
+      
+      <div class="header-actions">
+        <button id="btnForceRefresh" class="btn-header" title="Forcer la mise à jour et vider le cache">
+          <span>🔄</span> Actualiser
+        </button>
+        <button id="btnOpenFavorites" class="btn-header">
+          <span>⭐</span> Favoris (<span id="favCount">0</span>)
+        </button>
+        <button id="btnOpenTools" class="btn-header">
+          <span>🧰</span> Boîte à Outils
+        </button>
+        <a id="btnDownloadApk" href="#download-apk" class="btn-header btn-apk-header">
+          <span>📥</span> Télécharger APK
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="main-container">
+    
+    <!-- Hero / Search & Filters -->
+    <section class="hero-section">
+      <div class="search-box-wrapper">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="searchInput" 
+          class="search-input" 
+          placeholder="Rechercher par Marque (Peugeot, BMW...), Modèle, Réf Calculateur (EDC17C10, SID807, DCM3.7...), MCU..." 
+          autocomplete="off"
+          autofocus
+        >
+        <button id="searchClearBtn" class="search-clear-btn" title="Effacer">✕</button>
+      </div>
+
+      <!-- Filters Row -->
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label for="filterBrand">🚗 Marque Véhicule</label>
+          <select id="filterBrand" class="filter-select">
+            <option value="">Toutes les marques</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterEcuBrand">⚡ Fabricant ECU</label>
+          <select id="filterEcuBrand" class="filter-select">
+            <option value="">Tous les fabricants</option>
+            <option value="Bosch">Bosch</option>
+            <option value="Continental">Continental / Siemens</option>
+            <option value="Delphi">Delphi</option>
+            <option value="Magneti Marelli">Magneti Marelli</option>
+            <option value="Denso">Denso</option>
+            <option value="ACDelco">ACDelco</option>
+            <option value="Sagem">Sagem / Lucas</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterFamily">💾 Famille ECU</label>
+          <select id="filterFamily" class="filter-select">
+            <option value="">Toutes les familles</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterMode">🔌 Mode Connexion</label>
+          <select id="filterMode" class="filter-select">
+            <option value="">Tous les modes</option>
+            <option value="Module 71">Module 71 (Bench Sans Ouverture)</option>
+            <option value="Bootloader BSL">Bootloader BSL (Tricore Boot)</option>
+            <option value="Brochage Direct">Brochage Direct / Banc</option>
+            <option value="GPT">Bench GPT Mode</option>
+            <option value="BDM">BDM / JTAG</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filterFuel">⛽ Motorisation</label>
+          <select id="filterFuel" class="filter-select">
+            <option value="">Tous carburants</option>
+            <option value="Diesel">Diesel (HDi, TDI, dCi, CDTi...)</option>
+            <option value="Essence">Essence (THP, TFSI, TSI, TCe...)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Filter Pills -->
+      <div class="quick-pills-row">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; align-self: center;">Raccourcis :</span>
+        <button class="quick-pill" data-search="EDC17C10">PSA EDC17C10</button>
+        <button class="quick-pill" data-search="EDC16C34">PSA EDC16C34</button>
+        <button class="quick-pill" data-search="PCR2.1">VAG PCR2.1</button>
+        <button class="quick-pill" data-search="EDC17C50">BMW EDC17C50</button>
+        <button class="quick-pill" data-search="SID310">Renault SID310</button>
+        <button class="quick-pill" data-search="SID807">PSA/Ford SID807</button>
+        <button class="quick-pill" data-search="DCM3.7">Delphi DCM3.7</button>
+        <button class="quick-pill" data-search="IAW 5SF">Fiat IAW 5SF</button>
+        <button class="quick-pill" data-search="Module 71">Module 71 Bench</button>
+        <button class="quick-pill" data-search="Tricore">Tricore Boot BSL</button>
+      </div>
+    </section>
+
+    <!-- Status & Results Count Bar -->
+    <div class="status-bar">
+      <div class="results-count">
+        <span id="displayCount">0</span> calculateurs trouvés sur <strong id="totalCount">934</strong> dans la base
+      </div>
+      <div class="sort-wrapper">
+        <label for="sortOrder" style="font-size: 0.8rem;">Trier par :</label>
+        <select id="sortOrder" class="filter-select" style="padding: 4px 8px; font-size: 0.8rem;">
+          <option value="name_asc">Nom Calculateur (A - Z)</option>
+          <option value="name_desc">Nom Calculateur (Z - A)</option>
+          <option value="family">Famille ECU</option>
+          <option value="brand">Marque Véhicule</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Cards Grid -->
+    <div id="cardsGrid" class="cards-grid">
+      <!-- Dynamic ECU cards inserted via JS -->
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="empty-state" style="display: none;">
+      <div class="empty-icon">🔌</div>
+      <h3>Aucun calculateur ne correspond à votre recherche</h3>
+      <p>Essayez de modifier vos filtres ou de taper une référence partielle (ex: <em>EDC17, SID, DCM, ME7, Bosch</em>).</p>
+    </div>
+
+  </main>
+
+  <!-- Detailed Modal Viewer -->
+  <div id="detailModal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title-wrapper">
+          <h2 id="modalEcuTitle">Bosch EDC17C10</h2>
+          <div class="modal-tags" id="modalEcuTags">
+            <!-- Tags inserted dynamically -->
+          </div>
+        </div>
+        <button id="modalCloseBtn" class="modal-close-btn" title="Fermer">✕</button>
+      </div>
+
+      <div class="modal-body">
+        
+        <!-- Schematic Viewer Container -->
+        <!-- Schematic Direct Display -->
+        <div class="schematic-viewer-container">
+          <div class="viewer-toolbar">
+            <div class="toolbar-group">
+              <span class="viewer-header-title">📸 Schéma de brochage & raccordement</span>
+            </div>
+            <div class="toolbar-group">
+              <a id="btnOpenFullImg" href="#" target="_blank" class="btn-tool" title="Ouvrir l'image en grand format dans un nouvel onglet">🔍 Ouvrir en grand</a>
+              <button type="button" id="btnDownloadImg" class="btn-tool" title="Télécharger le schéma">💾 Télécharger</button>
+              <button type="button" id="btnFavModal" class="btn-tool" title="Ajouter aux favoris">⭐ Favori</button>
+            </div>
+          </div>
+
+          <div class="schematic-stage" id="schematicStage">
+            <img id="modalSchematicImg" src="" alt="Schéma de brochage" style="width:100%; height:auto; display:block;">
+          </div>
+
+          <!-- Multiple Images Thumbnail Selector -->
+          <div class="image-selector-tabs" id="imageSelectorTabs" style="display: none;">
+            <!-- Thumbnails inserted dynamically -->
+          </div>
+        </div>
+
+        <!-- Pinout Table and Technical Notes -->
+        <div class="pinout-details-section">
+          
+          <!-- Pinout Wiring Table -->
+          <div class="pinout-table-wrapper">
+            <div class="section-title">
+              <span>🔌</span> Raccordement des Broches / Pinout Direct
+            </div>
+            <table class="pin-table">
+              <thead>
+                <tr>
+                  <th>Signal</th>
+                  <th>Couleur Câble</th>
+                  <th>Description / Fonction</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="modalPinTableBody">
+                <!-- Pin rows -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Tech Specs & Workshop Notes -->
+          <div class="tech-notes-card">
+            <div class="section-title">
+              <span>📋</span> Consignes Techniques & Alimentation
+            </div>
+            <div class="tech-notes-content" id="modalTechNotes">
+              <!-- Technical notes -->
+            </div>
+
+            <!-- Technician User Notes -->
+            <div class="technician-user-notes">
+              <label for="technicianNoteInput" style="font-size: 0.78rem; font-weight: 700; color: var(--accent-sky);">
+                📝 Mes Notes d'Atelier pour ce calculateur :
+              </label>
+              <textarea id="technicianNoteInput" placeholder="Ex: Raccordé avec succès sur Banc avec 13.8V, résistance de boot 1k sur Pin 44..."></textarea>
+              <button id="btnSaveNote" class="btn-tool" style="margin-top: 6px; width: 100%; justify-content: center;">
+                Enregistrer la note
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen HD Lightbox Modal -->
+  <div id="lightboxModal" class="lightbox-modal">
+    <div class="lightbox-top-bar">
+      <div class="lightbox-title-group">
+        <span class="lightbox-badge">⚡ HD LIGHTBOX</span>
+        <h3 id="lightboxTitle">Schéma Haute Définition</h3>
+        <span id="lightboxPageIndicator" class="lightbox-page-indicator">Vue 1 / 1</span>
+      </div>
+      <div class="lightbox-actions">
+        <button id="btnLightboxRotate" class="lightbox-btn" title="Pivoter de 90°">🔄 Rotation</button>
+        <button id="btnLightboxInvert" class="lightbox-btn" title="Mode Contraste / Inversé">🌓 Contraste</button>
+        <button id="btnLightboxZoomOut" class="lightbox-btn" title="Dézoomer">🔍-</button>
+        <span id="lightboxZoomLevel" class="lightbox-zoom-val">100%</span>
+        <button id="btnLightboxZoomIn" class="lightbox-btn" title="Zoomer">🔍+</button>
+        <button id="btnLightboxReset" class="lightbox-btn" title="Réinitialiser">↺ 100%</button>
+        <button id="btnLightboxDownload" class="lightbox-btn" title="Télécharger l'image">💾</button>
+        <button id="btnLightboxClose" class="lightbox-btn lightbox-close-btn" title="Fermer (Échap)">✕</button>
+      </div>
+    </div>
+    <div class="lightbox-stage" id="lightboxStage">
+      <div id="lightboxSpinner" class="schematic-spinner" style="display: none;">
+        <div class="spinner-ring"></div>
+        <span>Chargement haute résolution...</span>
+      </div>
+      <img id="lightboxImg" class="lightbox-img" src="assets/icon-192.png" alt="Schéma HD">
+    </div>
+    <!-- Previous / Next Navigation Arrows -->
+    <button id="btnLightboxPrev" class="lightbox-nav-btn prev" title="Vue précédente (←)">❮</button>
+    <button id="btnLightboxNext" class="lightbox-nav-btn next" title="Vue suivante (→)">❯</button>
+    <div class="lightbox-hint">💡 Double-cliquez pour zoomer &bull; Glissez pour naviguer &bull; Touches ← / → pour changer de vue</div>
+  </div>
+
+  <!-- Workshop Tools Modal -->
+  <div id="toolsModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 900px;">
+      <div class="modal-header">
+        <div class="modal-title-wrapper">
+          <h2>🧰 Boîte à Outils Électronique Automobile</h2>
+          <div class="brand-subtitle">Guides de brochage standard, port OBD-II et calcul de résistances</div>
+        </div>
+        <button id="toolsModalCloseBtn" class="modal-close-btn">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="tools-grid">
+          
+          <!-- OBD-II Reference Card -->
+          <div class="tool-card" style="grid-column: 1 / -1;">
+            <div class="section-title">🔌 Connecteur Diagnostic Standard OBD-II (16 Broches)</div>
+            <p style="font-size: 0.82rem; color: var(--text-secondary);">
+              Repérage officiel de la prise OBD-II pour branchement d'outil de diagnostic ou banc universel :
+            </p>
+            
+            <div class="obd-port-diagram">
+              <div class="obd-pin" title="Fabricant">1 (OEM)</div>
+              <div class="obd-pin" title="J1850 Bus+">2 (Bus+)</div>
+              <div class="obd-pin" title="Fabricant">3 (OEM)</div>
+              <div class="obd-pin" style="background:#065f46; color:#a7f3d0;" title="Masse Châssis">4 (GND Châssis)</div>
+              <div class="obd-pin" style="background:#065f46; color:#a7f3d0;" title="Masse Signal">5 (GND Signal)</div>
+              <div class="obd-pin" style="background:#1e40af; color:#bfdbfe;" title="CAN High">6 (CAN-H)</div>
+              <div class="obd-pin" style="background:#581c87; color:#e9d5ff;" title="K-Line">7 (K-Line)</div>
+              <div class="obd-pin" title="Fabricant">8 (OEM)</div>
+              
+              <div class="obd-pin" title="Fabricant">9 (OEM)</div>
+              <div class="obd-pin" title="J1850 Bus-">10 (Bus-)</div>
+              <div class="obd-pin" title="Fabricant">11 (OEM)</div>
+              <div class="obd-pin" title="Fabricant">12 (OEM)</div>
+              <div class="obd-pin" title="Fabricant">13 (OEM)</div>
+              <div class="obd-pin" style="background:#1e40af; color:#bfdbfe;" title="CAN Low">14 (CAN-L)</div>
+              <div class="obd-pin" style="background:#581c87; color:#e9d5ff;" title="L-Line">15 (L-Line)</div>
+              <div class="obd-pin" style="background:#991b1b; color:#fecaca;" title="+12V Batterie">16 (+12V Bat)</div>
+            </div>
+
+            <div style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.5;">
+              • <strong>Broche 16</strong> : Alimentation +12V Permanente (Batterie)<br>
+              • <strong>Broches 4 & 5</strong> : Masses Électronique et Châssis<br>
+              • <strong>Broche 6 & 14</strong> : Bus CAN High (Pin 6) et CAN Low (Pin 14) (500 kbps)<br>
+              • <strong>Broche 7</strong> : Ligne K-Line (Diagnostic KWP2000 / ISO 9141-2)
+            </div>
+          </div>
+
+          <!-- Pull-up Resistor Reference -->
+          <div class="tool-card">
+            <div class="section-title">⚡ Résistances de Boot Mode</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+              <strong>Valeurs standards préconisées :</strong><br>
+              • <strong>1 000 Ω (1 kΩ)</strong> : Marron - Noir - Rouge - Or (Boot Tricore standard)<br>
+              • <strong>560 Ω</strong> : Vert - Bleu - Marron - Or (CNF1 / Horloge Boot)<br>
+              • <strong>100 Ω</strong> : Marron - Noir - Marron - Or (Ligne de reset)<br>
+              • <strong>10 kΩ</strong> : Marron - Noir - Orange - Or (Pull-up K-Line)
+            </div>
+          </div>
+
+          <!-- Power Supply Guide -->
+          <div class="tool-card">
+            <div class="section-title">🔋 Consignes Alimentation Banc</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6;">
+              • <strong>Tension</strong> : 13.5V à 14.2V stabilisés<br>
+              • <strong>Courant</strong> : Minimum 3.0A (5.0A recommandé pour calculateurs récents MD1/MG1/EDC17)<br>
+              • <strong>Sécurité</strong> : Ne jamais débrancher l'alimentation pendant une écriture Flash !
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APK Download Modal -->
+  <div id="apkModal" class="modal-backdrop">
+    <div class="modal-content" style="max-width: 650px;">
+      <div class="modal-header">
+        <div class="modal-title-wrapper">
+          <h2>📥 Téléchargement Application Android APK</h2>
+          <span class="brand-subtitle">PIN OUT CFPM GBE AUTO 237 pour smartphones et tablettes</span>
+        </div>
+        <button id="apkModalCloseBtn" class="modal-close-btn">✕</button>
+      </div>
+
+      <div class="modal-body" style="text-align: center; gap: 16px;">
+        <img src="assets/icon.svg" style="width: 80px; height: 80px; margin: 0 auto;" alt="App Icon">
+        <h3 style="color: #ffffff;">Application Mobile Dédiée aux Électriciens Auto</h3>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+          L'application intègre l'ensemble des <strong>934+ schémas de calculateurs</strong>, avec un moteur de recherche instantané, le zoom haute définition et le fonctionnement 100% hors-ligne dans votre atelier mécanique !
+        </p>
+
+        <div style="background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px; text-align: left; font-size: 0.82rem;">
+          <strong style="color: var(--accent-sky);">🚀 Deux façons simples de l'installer :</strong>
+          <ol style="margin-left: 18px; margin-top: 8px; line-height: 1.6;">
+            <li><strong>Téléchargement Direct du fichier APK</strong> généré automatiquement sur les GitHub Releases du projet.</li>
+            <li><strong>Installation Instantanée PWA</strong> : Ouvrez cette page sur Google Chrome / Navigateur Android et cliquez sur <em>« Ajouter à l'écran d'accueil »</em> pour l'installer comme une vraie application sans passer par le Play Store.</li>
+          </ol>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <a id="btnDirectDownloadLink" href="https://github.com/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237/releases/latest/download/PIN_OUT_CFPM_GBE_AUTO_237_v2.0.apk" target="_blank" class="btn-view-pinout" style="padding: 14px; font-size: 1rem; text-decoration: none;">
+            📥 Télécharger directement l'APK (.apk)
+          </a>
+          <a href="https://github.com/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237/releases" target="_blank" class="btn-header" style="justify-content: center; text-decoration: none; padding: 10px;">
+            🔗 Voir toutes les versions sur GitHub Releases
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <div class="footer-title">PIN OUT CFPM GBE AUTO 237 - Centre de Formation Professionnelle aux Métiers de l'Automobile</div>
+      <div>Base de données électronique pour techniciens diagnostic, chiptuning & réparation calculateurs.</div>
+      <div style="color: var(--accent-sky); font-size: 0.72rem; margin-top: 4px;">Propulsé par Antigravity AI Engine &bull; 934+ Brochages Enregistrés</div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js?v=2.1.4"></script>
+  <script src="js/app.js?v=2.1.4"></script>
+
+</body>
+</html>
