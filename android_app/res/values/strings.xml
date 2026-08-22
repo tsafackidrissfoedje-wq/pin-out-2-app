@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pin Out 2</string>
+    <string name="app_subtitle">Base de Données Calculateurs &amp; Câblages</string>
+    <string name="search_hint">Rechercher calculateur (ex: EDC17C10, PSA, TC1797, Bench...)</string>
+    <string name="title_detail">Schéma Pinout</string>
+    <string name="tab_all">Tous</string>
+    <string name="tab_ktag">K-TAG</string>
+    <string name="tab_bench">Bench 71</string>
+    <string name="tab_boot">Boot Tricore</string>
+    <string name="tab_hexportal">HexPortal</string>
+    <string name="tab_dm">DM Pinout</string>
+    <string name="tab_fav">Favoris</string>
+    <string name="no_results">Aucun calculateur trouvé pour votre recherche.</string>
+    <string name="items_count">%d calculateurs disponibles</string>
+</resources>
