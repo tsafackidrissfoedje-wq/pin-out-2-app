@@ -10,12 +10,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0B1329;
-      --card: #131D38;
-      --card-hover: #1A284C;
-      --panel: #0F1A36;
-      --line: rgba(255, 255, 255, 0.08);
-      --line-hover: rgba(56, 189, 248, 0.3);
+      --bg: #071A33;
+      --card: #0D2547;
+      --card-hover: #123262;
+      --panel: #0A1E3A;
+      --line: rgba(180, 205, 235, 0.16);
+      --line-hover: rgba(56, 189, 248, 0.4);
       --blue: #38BDF8;
       --blue-deep: #0284C7;
       --yellow: #F59E0B;
@@ -38,7 +38,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(11, 19, 41, 0.95);
+      background: rgba(7, 26, 51, 0.96);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--line);
       padding: 12px 16px;
@@ -57,7 +57,7 @@
       gap: 10px;
     }
     .logo-badge {
-      background: linear-gradient(135deg, var(--blue), var(--blue-deep));
+      background: linear-gradient(135deg, #0284C7, #2563EB);
       color: #FFF;
       font-family: 'Space Grotesk', sans-serif;
       font-weight: 700;
@@ -158,7 +158,7 @@
     }
     .chip.active {
       background: var(--blue);
-      color: #071224;
+      color: #071A33;
       font-weight: 700;
       border-color: var(--blue);
     }
@@ -251,13 +251,13 @@
       position: fixed;
       inset: 0;
       z-index: 1000;
-      background: rgba(3, 7, 18, 0.9);
+      background: rgba(3, 10, 20, 0.95);
       backdrop-filter: blur(8px);
       flex-direction: column;
     }
     .modal.open { display: flex; }
     .modal-header {
-      background: var(--panel);
+      background: #0A1E3A;
       border-bottom: 1px solid var(--line);
       padding: 12px 16px;
       display: flex;
@@ -274,11 +274,11 @@
       text-overflow: ellipsis;
     }
     .modal-close {
-      background: #1E293B;
+      background: #123262;
       border: 1px solid var(--line);
       color: var(--text);
-      width: 34px;
-      height: 34px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -288,15 +288,14 @@
     }
     .modal-body {
       flex: 1;
-      overflow: auto;
-      -webkit-overflow-scrolling: touch;
+      overflow: hidden;
       position: relative;
     }
     .modal-frame {
       width: 100%;
       height: 100%;
       border: none;
-      background: #0F172A;
+      background: #071A33;
     }
     .spinner {
       position: absolute;
@@ -454,31 +453,47 @@
 
         const repo = getRepo(item.source, cleanPath);
         const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
+        
+        // Folder base URL for resolving relative image links
+        const lastSlash = cleanPath.lastIndexOf('/');
+        const folderPath = lastSlash !== -1 ? cleanPath.substring(0, lastSlash + 1) : '';
+        const encodedFolder = folderPath.split('/').map(encodeURIComponent).join('/');
+        const cdnFolderUrl = `https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/${repo}@main/${encodedFolder}`;
+        const rawFolderUrl = `https://raw.githubusercontent.com/tsafackidrissfoedje-wq/${repo}/main/${folderPath}`;
+
         const rawUrl = `https://raw.githubusercontent.com/tsafackidrissfoedje-wq/${repo}/main/${encodedPath}`;
         const cdnUrl = `https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/${repo}@main/${encodedPath}`;
 
-        fetch(rawUrl)
-          .catch(() => fetch(cdnUrl))
-          .then(res => res.text())
+        fetch(cdnUrl)
+          .catch(() => fetch(rawUrl))
+          .then(res => {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.text();
+          })
           .then(html => {
-            // Fix images
+            // Normalize image paths
             let processed = html.replace(/<base[^>]*>/gi, '');
-            processed = processed.replace(/(?:\.\.\/)+assets\/images\//gi, 'https://raw.githubusercontent.com/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237/main/assets/images/');
-            processed = processed.replace(/assets\/images\//gi, 'https://raw.githubusercontent.com/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237/main/assets/images/');
+            
+            // Rewrite all CFPM image links to fast jsDelivr CDN
+            processed = processed.replace(/(?:\.\.\/)+assets\/images\/([^\s"'<>]+)/gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/$1');
+            processed = processed.replace(/assets\/images\/([^\s"'<>]+)/gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/$1');
+            processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-cfpm-gbe-auto-237\/main\/assets\/images\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/');
 
-            const css = `<style>
-              body { background:#0F172A !important; color:#E2E8F0 !important; font-family:-apple-system,sans-serif !important; padding:14px !important; line-height:1.6 !important; }
-              img { max-width:100% !important; height:auto !important; border-radius:10px !important; display:block !important; margin:14px auto !important; background:#1E293B !important; }
-              table { width:100% !important; border-collapse:collapse !important; margin:14px 0 !important; background:#1E293B !important; border-radius:8px !important; overflow:hidden !important; border:1px solid #334155 !important; }
-              th, td { padding:10px 12px !important; border:1px solid #334155 !important; font-size:13px !important; }
-              th { background:#334155 !important; color:#38BDF8 !important; }
+            const baseTag = `<base href="${cdnFolderUrl}">`;
+            const customCss = `<style>
+              body { background:#071A33 !important; color:#E2E8F0 !important; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif !important; padding:16px !important; line-height:1.6 !important; }
+              img { max-width:100% !important; height:auto !important; border-radius:10px !important; display:block !important; margin:16px auto !important; background:#0D2547 !important; box-shadow:0 4px 20px rgba(0,0,0,0.3) !important; }
+              table { width:100% !important; border-collapse:collapse !important; margin:16px 0 !important; background:#0D2547 !important; border-radius:10px !important; overflow:hidden !important; border:1px solid rgba(180,205,235,0.16) !important; }
+              th, td { padding:10px 14px !important; border:1px solid rgba(180,205,235,0.1) !important; font-size:13.5px !important; }
+              th { background:#123262 !important; color:#38BDF8 !important; font-weight:600 !important; }
               .texter, div[id^='a'], div[id^='b'], div[id^='c'] { display:block !important; }
+              a { color:#38BDF8 !important; }
             </style><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">`;
 
             if (processed.includes('<head>')) {
-              processed = processed.replace('<head>', '<head>' + css);
+              processed = processed.replace('<head>', '<head>' + baseTag + customCss);
             } else {
-              processed = css + processed;
+              processed = '<head>' + baseTag + customCss + '</head>' + processed;
             }
 
             modalFrame.srcdoc = processed;
@@ -486,7 +501,7 @@
           })
           .catch(err => {
             modalSpinner.style.display = 'none';
-            modalFrame.srcdoc = `<body style="background:#0F172A;color:#EF4444;font-family:sans-serif;padding:30px;text-align:center;"><h3>Erreur de chargement</h3><p>Impossible de charger le schéma depuis GitHub (${err.message})</p></body>`;
+            modalFrame.srcdoc = `<body style="background:#071A33;color:#EF4444;font-family:sans-serif;padding:30px;text-align:center;"><h3>Erreur de chargement</h3><p>Impossible de charger le schéma (${err.message})</p></body>`;
           });
       };
 
