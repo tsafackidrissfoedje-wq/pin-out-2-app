@@ -64,7 +64,6 @@ public class MainActivity extends Activity {
 
         initViews();
         setupEvents();
-        checkAndRequestStoragePermission();
 
         adapter = new PinoutAdapter(this, new PinoutAdapter.OnFavoriteClickListener() {
             @Override
@@ -75,49 +74,6 @@ public class MainActivity extends Activity {
         lvResults.setAdapter(adapter);
 
         new LoadDatabaseTask().execute();
-    }
-
-    private void checkAndRequestStoragePermission() {
-        if (Build.VERSION.SDK_INT >= 30) { // Android 11+
-            boolean isManager = false;
-            try {
-                java.lang.reflect.Method method = Environment.class.getMethod("isExternalStorageManager");
-                isManager = (Boolean) method.invoke(null);
-            } catch (Exception e) {
-                isManager = false;
-            }
-
-            if (!isManager) {
-                new AlertDialog.Builder(this)
-                    .setTitle("Autorisation requise 📁")
-                    .setMessage("Pin Out 2 a besoin d'accéder aux schémas et images des calculateurs situés dans votre stockage (/sdcard/PinOut2/data).\n\nVeuillez autoriser l'accès aux fichiers.")
-                    .setCancelable(false)
-                    .setPositiveButton("Autoriser", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            try {
-                                Intent intent = new Intent("android.settings.MANAGE_APP_ALL_FILES_ACCESS_PERMISSION");
-                                intent.setData(Uri.parse("package:" + getPackageName()));
-                                startActivity(intent);
-                            } catch (Exception e) {
-                                try {
-                                    Intent intent = new Intent("android.settings.MANAGE_ALL_FILES_ACCESS_PERMISSION");
-                                    startActivity(intent);
-                                } catch (Exception ignored) {}
-                            }
-                        }
-                    })
-                    .setNegativeButton("Plus tard", null)
-                    .show();
-            }
-        } else if (Build.VERSION.SDK_INT >= 23) { // Android 6 - 10
-            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                }, 1001);
-            }
-        }
     }
 
     @Override
