@@ -172,6 +172,19 @@ public class DetailActivity extends Activity {
     }
 
     public static String getRepoForSource(String source, String cleanPath) {
+        if (cleanPath != null) {
+            String p = cleanPath.toLowerCase();
+            if (p.startsWith("assets/images") || p.contains("assets/images")) {
+                return "pin-out-cfpm-gbe-auto-237";
+            }
+            if (p.startsWith("bsl_bootmode_tricore") || p.startsWith("pcmktm_bench_module71") || p.startsWith("cfpm_pinouts")) {
+                return "pin-out-2-bench-bsl";
+            } else if (p.startsWith("dm_bosch_siemens_marelli") || p.startsWith("hexportal_ecu_connections")) {
+                return "pin-out-2-hexportal-dm";
+            } else if (p.startsWith("ktag_instruction")) {
+                return "pin-out-2-ktag";
+            }
+        }
         if (source != null) {
             if (source.equals("bsl_bootmode_tricore") || source.equals("pcmktm_bench_module71") || source.equals("cfpm_gbe_auto")) {
                 return "pin-out-2-bench-bsl";
@@ -179,17 +192,6 @@ public class DetailActivity extends Activity {
                 return "pin-out-2-hexportal-dm";
             } else if (source.equals("ktag_instruction")) {
                 return "pin-out-2-ktag";
-            }
-        }
-        if (cleanPath != null) {
-            if (cleanPath.startsWith("bsl_bootmode_tricore") || cleanPath.startsWith("pcmktm_bench_module71") || cleanPath.startsWith("cfpm_pinouts")) {
-                return "pin-out-2-bench-bsl";
-            } else if (cleanPath.startsWith("dm_bosch_siemens_marelli") || cleanPath.startsWith("hexportal_ecu_connections")) {
-                return "pin-out-2-hexportal-dm";
-            } else if (cleanPath.startsWith("ktag_instruction")) {
-                return "pin-out-2-ktag";
-            } else if (cleanPath.startsWith("assets/images")) {
-                return "pin-out-cfpm-gbe-auto-237";
             }
         }
         return "pin-out-2-bench-bsl";
@@ -228,8 +230,8 @@ public class DetailActivity extends Activity {
             URL url = new URL(urlStr);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("User-Agent", "PinOut2-App");
-            conn.setConnectTimeout(12000);
-            conn.setReadTimeout(18000);
+            conn.setConnectTimeout(15000);
+            conn.setReadTimeout(25000);
             conn.setInstanceFollowRedirects(true);
             int code = conn.getResponseCode();
             if (code == 200) {
@@ -309,11 +311,17 @@ public class DetailActivity extends Activity {
         if (VIRTUAL_HOST.equalsIgnoreCase(host)) {
             String path = uri.getPath();
             if (path == null || path.isEmpty() || path.equals("/")) return null;
-            if (path.startsWith("/")) path = path.substring(1);
+            while (path.startsWith("/")) path = path.substring(1);
 
             try {
                 path = Uri.decode(path);
             } catch (Exception ignored) {}
+
+            // Normalize path for CFPM images
+            if (path.contains("assets/images/")) {
+                int idx = path.indexOf("assets/images/");
+                path = path.substring(idx);
+            }
 
             if (path.startsWith("extracted/")) {
                 path = path.substring("extracted/".length());
@@ -374,11 +382,15 @@ public class DetailActivity extends Activity {
         html = html.replaceAll("(?i)src=[\"'](?:file:///?[a-zA-Z]:/[^\"']*/|file:///[^\"']*/)([^\"']+)[\"']", "src=\"$1\"");
         html = html.replaceAll("(?i)href=[\"'](?:file:///?[a-zA-Z]:/[^\"']*/|file:///[^\"']*/)([^\"']+)[\"']", "href=\"$1\"");
 
-        // 3. Inject modern responsive dark theme CSS
+        // 3. Normalize CFPM assets/images paths to absolute virtual URL
+        html = html.replaceAll("(?i)src=[\"'](?:\\.\\./)+assets/images/([^\"']+)[\"']", "src=\"https://app.pinout/assets/images/$1\"");
+        html = html.replaceAll("(?i)src=[\"']assets/images/([^\"']+)[\"']", "src=\"https://app.pinout/assets/images/$1\"");
+
+        // 4. Inject modern responsive dark theme CSS
         String css = "<style>" +
                      "body { background-color: #0F172A !important; color: #E2E8F0 !important; font-family: -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif !important; padding: 14px !important; line-height: 1.6 !important; margin: 0 !important; } " +
                      "a { color: #38BDF8 !important; text-decoration: none !important; } " +
-                     "img { max-width: 100% !important; height: auto !important; border-radius: 10px !important; box-shadow: 0 4px 14px rgba(0,0,0,0.6) !important; margin: 16px auto !important; display: block !important; background: #1E293B !important; } " +
+                     "img { max-width: 100% !important; height: auto !important; border-radius: 10px !important; box-shadow: 0 4px 14px rgba(0,0,0,0.6) !important; margin: 16px auto !important; display: block !important; background: #1E293B !important; min-height: 50px !important; } " +
                      "table { width: 100% !important; border-collapse: collapse !important; margin: 16px 0 !important; background: #1E293B !important; border-radius: 10px !important; overflow: hidden !important; border: 1px solid #334155 !important; } " +
                      "th, td { padding: 10px 12px !important; border: 1px solid #334155 !important; font-size: 13px !important; } " +
                      "th { background-color: #334155 !important; color: #38BDF8 !important; font-weight: bold !important; } " +
