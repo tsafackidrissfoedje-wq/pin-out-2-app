@@ -3,309 +3,463 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>PIN OUT 2 Pro — Base Calculateurs & Schémas (3 747 calculateurs)</title>
-  <meta name="description" content="Base de données professionnelle de brochages, schémas de connexion et calculateurs moteur (Bench, Boot, K-Tag, HexPortal, DM, CFPM GBE AUTO)">
+  <title>PIN OUT 2 — ECU & TCU Pinout Master Database (3 747 calculateurs)</title>
+  <meta name="description" content="Application officielle PIN OUT 2 - Base de données calculateurs, schémas de connexion et brochages professionnels">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #071A33;
-      --card: #0D2547;
-      --card-hover: #123262;
-      --panel: #0A1E3A;
-      --line: rgba(180, 205, 235, 0.16);
-      --line-hover: rgba(56, 189, 248, 0.4);
-      --blue: #38BDF8;
-      --blue-deep: #0284C7;
-      --yellow: #F59E0B;
-      --green: #10B981;
-      --purple: #A855F7;
-      --text: #F8FAFC;
-      --text-muted: #94A3B8;
-      --text-faint: #64748B;
+      --bg-dark: #0B1329;
+      --bg-card: #101E36;
+      --bg-search: #13223D;
+      --border-color: rgba(255, 255, 255, 0.09);
+      --primary: #38BDF8;
+      --primary-dark: #0284C7;
+      --accent: #0EA5E9;
+      --accent-orange: #F59E0B;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --chip-bg: #13223D;
+      --chip-active-bg: #0284C7;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    html, body {
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    #appContainer {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px;
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
     }
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(7, 26, 51, 0.96);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--line);
-      padding: 12px 16px;
-    }
-    .top-row {
-      max-width: 1000px;
-      margin: 0 auto;
+
+    /* Header matching activity_main.xml */
+    .app-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
+      margin-bottom: 12px;
+      padding-top: 6px;
+      gap: 10px;
     }
-    .logo-wrap {
+    .header-left {
       display: flex;
       align-items: center;
       gap: 10px;
+      flex: 1;
+      min-width: 0;
     }
-    .logo-badge {
+    .app-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       background: linear-gradient(135deg, #0284C7, #2563EB);
-      color: #FFF;
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 15px;
-      padding: 6px 10px;
-      border-radius: 8px;
-      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
-    }
-    .app-title h1 {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.2;
-    }
-    .app-title p {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-    .btn-apk {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      color: #FFF;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.35);
+      flex-shrink: 0;
+    }
+    .app-titles {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .app-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.2;
+      font-family: 'Space Grotesk', sans-serif;
+      letter-spacing: -0.02em;
+    }
+    .app-subtitle {
+      font-size: 11px;
+      color: var(--accent);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .fav-counter-btn {
+      background: var(--chip-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 18px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent-orange);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .fav-counter-btn:hover { background: #1B2F52; }
+    .btn-download-apk {
       background: linear-gradient(135deg, #2563EB, #1D4ED8);
       color: #FFF;
       text-decoration: none;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 600;
-      padding: 8px 14px;
-      border-radius: 8px;
+      padding: 7px 12px;
+      border-radius: 18px;
       border: 1px solid rgba(255, 255, 255, 0.15);
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
       white-space: nowrap;
-      transition: transform 0.1s;
     }
-    .btn-apk:active { transform: scale(0.97); }
-    .search-container {
-      max-width: 1000px;
-      margin: 10px auto 0;
-      position: relative;
-    }
-    .search-input {
-      width: 100%;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 12px 14px 12px 38px;
-      color: var(--text);
-      font-size: 14.5px;
-      outline: none;
+    .btn-download-apk:active { transform: scale(0.96); }
+
+    /* Search Box matching bg_search */
+    .search-box {
+      background: var(--bg-search);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      margin-bottom: 10px;
+      height: 48px;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .search-input:focus {
-      border-color: var(--blue);
+    .search-box:focus-within {
+      border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15);
     }
     .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-faint);
-      pointer-events: none;
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-right: 8px;
     }
-    .clear-search {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
+    .search-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: inherit;
+    }
+    .search-input::placeholder { color: var(--text-muted); }
+    .btn-clear {
       background: none;
       border: none;
-      color: var(--text-faint);
+      color: var(--text-secondary);
       font-size: 16px;
       cursor: pointer;
+      padding: 6px;
       display: none;
     }
-    .filter-scroll {
-      max-width: 1000px;
-      margin: 10px auto 0;
+
+    /* Categories Horizontal Scroll Bar matching activity_main.xml */
+    .scroll-row {
       display: flex;
       gap: 6px;
       overflow-x: auto;
       scrollbar-width: none;
+      margin-bottom: 8px;
       padding-bottom: 2px;
     }
-    .filter-scroll::-webkit-scrollbar { display: none; }
-    .chip {
-      background: var(--panel);
-      color: var(--text-muted);
-      border: 1px solid var(--line);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 12px;
+    .scroll-row::-webkit-scrollbar { display: none; }
+    .chip-btn {
+      background: var(--chip-bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 18px;
+      font-size: 11px;
       font-weight: 500;
       white-space: nowrap;
       cursor: pointer;
       transition: all 0.15s;
     }
-    .chip.active {
-      background: var(--blue);
-      color: #071A33;
+    .chip-btn.active {
+      background: var(--chip-active-bg);
+      color: var(--text-primary);
+      border-color: var(--chip-active-bg);
       font-weight: 700;
-      border-color: var(--blue);
+      box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
     }
-    main {
-      flex: 1;
-      max-width: 1000px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 16px;
-    }
-    .meta-bar {
+    .chip-fav { color: var(--accent-orange); }
+
+    /* Brands Quick Bar matching activity_main.xml */
+    .brand-row {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12.5px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      margin-bottom: 10px;
+      padding-bottom: 2px;
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 10px;
-    }
-    .item-card {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 14px;
+    .brand-row::-webkit-scrollbar { display: none; }
+    .brand-btn {
+      background: var(--chip-bg);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      padding: 4px 10px;
+      border-radius: 14px;
+      font-size: 10px;
+      font-weight: 500;
+      white-space: nowrap;
       cursor: pointer;
+      transition: all 0.15s;
+    }
+    .brand-btn.active {
+      background: var(--chip-active-bg);
+      color: var(--text-primary);
+      border-color: var(--chip-active-bg);
+      font-weight: 700;
+    }
+
+    /* Count Header matching tv_count */
+    .count-header {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    /* List of Pinouts matching item_pinout.xml */
+    .pinout-list {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      transition: all 0.15s;
-      text-align: left;
+      gap: 8px;
+      flex: 1;
+    }
+    .item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
     }
     .item-card:hover {
-      background: var(--card-hover);
-      border-color: var(--line-hover);
+      background: #142544;
+      border-color: rgba(56, 189, 248, 0.35);
       transform: translateY(-1px);
     }
-    .item-header {
+    .item-card:active { transform: scale(0.99); }
+    .item-top {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 8px;
+      margin-bottom: 6px;
+      gap: 6px;
     }
-    .badge-cat {
-      font-size: 10.5px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 5px;
-      letter-spacing: 0.03em;
+    .item-badge {
+      background: #162644;
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--primary);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }
-    .cat-cfpm { background: rgba(245, 158, 11, 0.15); color: #FBBF24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .cat-ktag { background: rgba(59, 130, 246, 0.15); color: #60A5FA; border: 1px solid rgba(59, 130, 246, 0.3); }
-    .cat-bench { background: rgba(56, 189, 248, 0.15); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.3); }
-    .cat-boot { background: rgba(168, 85, 247, 0.15); color: #C084FC; border: 1px solid rgba(168, 85, 247, 0.3); }
-    .cat-hex { background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .cat-dm { background: rgba(236, 72, 153, 0.15); color: #F472B6; border: 1px solid rgba(236, 72, 153, 0.3); }
-    .badge-mcu {
+    .badge-cfpm { color: #FBBF24; border-color: rgba(245, 158, 11, 0.3); background: rgba(245, 158, 11, 0.12); }
+    .badge-ktag { color: #60A5FA; border-color: rgba(59, 130, 246, 0.3); background: rgba(59, 130, 246, 0.12); }
+    .badge-bench { color: #38BDF8; border-color: rgba(56, 189, 248, 0.3); background: rgba(56, 189, 248, 0.12); }
+    .badge-boot { color: #C084FC; border-color: rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.12); }
+    .badge-hex { color: #34D399; border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.12); }
+    .badge-dm { color: #F472B6; border-color: rgba(236, 72, 153, 0.3); background: rgba(236, 72, 153, 0.12); }
+
+    .item-mcu-badge {
+      background: #162644;
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      color: var(--accent);
+      padding: 3px 6px;
+      border-radius: 6px;
+      font-size: 10px;
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 10.5px;
-      color: var(--text-faint);
     }
+    .item-spacer { flex: 1; }
+    .item-img-count {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+    .item-fav-btn {
+      color: var(--accent-orange);
+      font-size: 18px;
+      padding: 2px 6px;
+      cursor: pointer;
+      line-height: 1;
+      user-select: none;
+      transition: transform 0.15s;
+    }
+    .item-fav-btn:hover { transform: scale(1.25); }
     .item-title {
-      font-size: 14.5px;
-      font-weight: 600;
-      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
       line-height: 1.35;
+      margin-bottom: 4px;
     }
     .item-summary {
       font-size: 12px;
-      color: var(--text-muted);
+      color: var(--text-secondary);
       line-height: 1.4;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .item-footer {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 4px;
-      font-size: 11px;
-      color: var(--text-faint);
+
+    .load-more-btn {
+      background: var(--chip-bg);
+      border: 1px solid var(--border-color);
+      color: var(--primary);
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 16px 0 30px;
+      text-align: center;
+      transition: all 0.15s;
     }
-    .modal {
+    .load-more-btn:hover { background: #1B2F52; }
+
+    /* Detail Screen matching activity_detail.xml */
+    #detailScreen {
       display: none;
       position: fixed;
       inset: 0;
       z-index: 1000;
-      background: rgba(3, 10, 20, 0.95);
-      backdrop-filter: blur(8px);
+      background: var(--bg-dark);
       flex-direction: column;
     }
-    .modal.open { display: flex; }
-    .modal-header {
-      background: #0A1E3A;
-      border-bottom: 1px solid var(--line);
-      padding: 12px 16px;
+    #detailScreen.open { display: flex; }
+
+    /* Top Action Bar matching activity_detail.xml */
+    .detail-action-bar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      padding: 10px 12px;
+      gap: 10px;
     }
-    .modal-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .modal-close {
-      background: #123262;
-      border: 1px solid var(--line);
-      color: var(--text);
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
+    .btn-detail-back {
+      width: 38px;
+      height: 38px;
+      background: var(--chip-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 19px;
+      color: var(--text-primary);
+      font-size: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 18px;
+      flex-shrink: 0;
     }
-    .modal-body {
+    .detail-header-info {
       flex: 1;
-      overflow: hidden;
-      position: relative;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
     }
-    .modal-frame {
+    .detail-main-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .detail-sub-category {
+      font-size: 11px;
+      color: var(--primary);
+    }
+    .btn-detail-fav {
+      width: 38px;
+      height: 38px;
+      background: var(--chip-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 19px;
+      color: var(--accent-orange);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Quick Pin Color Legend Bar matching activity_detail.xml */
+    .pin-legend-bar {
+      background: #162032;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding: 6px 10px;
+    }
+    .pin-legend-bar::-webkit-scrollbar { display: none; }
+    .legend-title {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+      margin-right: 2px;
+    }
+    .tag-pin {
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .tag-vcc { background: #EF4444; color: #FFF; }
+    .tag-gnd { background: #000000; color: #FFF; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .tag-kline { background: #EAB308; color: #000; }
+    .tag-canh { background: #38BDF8; color: #000; }
+    .tag-canl { background: #22C55E; color: #FFF; }
+    .tag-boot { background: #A855F7; color: #FFF; }
+    .tag-gpt { background: #EC4899; color: #FFF; }
+
+    /* WebView iframe Container */
+    .detail-content-frame {
+      flex: 1;
+      position: relative;
+      background: var(--bg-dark);
+    }
+    .detail-iframe {
       width: 100%;
       height: 100%;
       border: none;
-      background: #071A33;
+      background: var(--bg-dark);
     }
-    .spinner {
+    .detail-spinner {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border: 3px solid rgba(56, 189, 248, 0.2);
-      border-top-color: var(--blue);
+      border-top-color: var(--primary);
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
@@ -313,72 +467,137 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="top-row">
-      <div class="logo-wrap">
-        <div class="logo-badge">PIN OUT 2</div>
-        <div class="app-title">
-          <h1>Base Calculateurs</h1>
-          <p>3 747 calculateurs &amp; schémas interactifs</p>
+
+  <div id="appContainer">
+    <!-- Header matching activity_main.xml -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="app-icon">PIN2</div>
+        <div class="app-titles">
+          <div class="app-name">PIN OUT 2</div>
+          <div class="app-subtitle">ECU &amp; TCU Pinout Master Database</div>
         </div>
       </div>
-      <a class="btn-apk" href="https://github.com/tsafackidrissfoedje-wq/pin-out-2-app/releases/tag/v2.0.0" target="_blank">
-        📲 Télécharger l'App (APK)
-      </a>
-    </div>
+      <div class="header-actions">
+        <button id="favCounterBtn" class="fav-counter-btn" title="Voir les favoris">★ 0</button>
+        <a class="btn-download-apk" href="https://github.com/tsafackidrissfoedje-wq/pin-out-2-app/releases/tag/v2.0.0" target="_blank">
+          📲 APK v2.0
+        </a>
+      </div>
+    </header>
 
-    <div class="search-container">
+    <!-- Search Box matching bg_search -->
+    <div class="search-box">
       <span class="search-icon">🔍</span>
-      <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un calculateur, MCU, marque, référence..." autocomplete="off">
-      <button id="clearBtn" class="clear-search">✕</button>
+      <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par modèle, ECU, MCU, marque, pin..." autocomplete="off">
+      <button id="btnClear" class="btn-clear" aria-label="Effacer">✕</button>
     </div>
 
-    <div class="filter-scroll" id="categoryChips">
-      <button class="chip active" data-cat="ALL">Tous (3 747)</button>
-      <button class="chip" data-cat="cfpm_gbe_auto">CFPM GBE (934)</button>
-      <button class="chip" data-cat="ktag_instruction">K-TAG (1 987)</button>
-      <button class="chip" data-cat="pcmktm_bench_module71">Bench 71 (174)</button>
-      <button class="chip" data-cat="bsl_bootmode_tricore">Boot / BSL (169)</button>
-      <button class="chip" data-cat="hexportal_ecu_connections">HexPortal (299)</button>
-      <button class="chip" data-cat="dm_bosch_siemens_marelli">DM Pinout (184)</button>
+    <!-- Categories Horizontal Scroll Bar matching activity_main.xml -->
+    <div class="scroll-row" id="categoryBar">
+      <button class="chip-btn active" data-cat="ALL">Tous (3747)</button>
+      <button class="chip-btn" data-cat="cfpm_gbe_auto">CFPM GBE (934)</button>
+      <button class="chip-btn" data-cat="ktag_instruction">K-TAG (1987)</button>
+      <button class="chip-btn" data-cat="pcmktm_bench_module71">Bench Mod 71 (174)</button>
+      <button class="chip-btn" data-cat="bsl_bootmode_tricore">Boot Tricore (169)</button>
+      <button class="chip-btn" data-cat="hexportal_ecu_connections">HexPortal (299)</button>
+      <button class="chip-btn" data-cat="dm_bosch_siemens_marelli">DM Pinouts (184)</button>
+      <button class="chip-btn chip-fav" data-cat="FAVORITES">★ Favoris</button>
     </div>
-  </header>
 
-  <main>
-    <div class="meta-bar">
-      <span id="resultsCount">Chargement de la base de données...</span>
-      <span id="loadingText"></span>
+    <!-- Brands Quick Bar matching activity_main.xml -->
+    <div class="brand-row" id="brandBar">
+      <button class="brand-btn active" data-brand="ALL">Toutes Marques</button>
+      <button class="brand-btn" data-brand="bosch">Bosch</button>
+      <button class="brand-btn" data-brand="siemens">Siemens / Conti</button>
+      <button class="brand-btn" data-brand="delphi">Delphi</button>
+      <button class="brand-btn" data-brand="denso">Denso</button>
+      <button class="brand-btn" data-brand="marelli">Marelli</button>
+      <button class="brand-btn" data-brand="psa">PSA (Peugeot/Citroën)</button>
+      <button class="brand-btn" data-brand="vag">VAG (VW/Audi)</button>
+      <button class="brand-btn" data-brand="bmw">BMW</button>
+      <button class="brand-btn" data-brand="mercedes">Mercedes</button>
+      <button class="brand-btn" data-brand="renault">Renault</button>
+      <button class="brand-btn" data-brand="ford">Ford</button>
     </div>
-    <div class="grid" id="resultsGrid"></div>
-  </main>
 
-  <div class="modal" id="detailModal">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Schéma du calculateur</div>
-      <button class="modal-close" id="modalClose">✕</button>
+    <!-- Count Header matching tv_count -->
+    <div class="count-header" id="countHeader">Chargement de la base de données (3 747 calculateurs)...</div>
+
+    <!-- List of Pinouts matching item_pinout.xml -->
+    <div class="pinout-list" id="pinoutList"></div>
+    
+    <button id="loadMoreBtn" class="load-more-btn" style="display:none;">Afficher plus de calculateurs...</button>
+  </div>
+
+  <!-- Detail Screen matching activity_detail.xml -->
+  <div id="detailScreen">
+    <!-- Top Action Bar -->
+    <div class="detail-action-bar">
+      <button id="btnDetailBack" class="btn-detail-back" title="Retour">←</button>
+      <div class="detail-header-info">
+        <div class="detail-main-title" id="detailTitle">Calculateur</div>
+        <div class="detail-sub-category" id="detailCategory">Catégorie</div>
+      </div>
+      <button id="btnDetailFav" class="btn-detail-fav" title="Favori">☆</button>
     </div>
-    <div class="modal-body">
-      <div class="spinner" id="modalSpinner"></div>
-      <iframe class="modal-frame" id="modalFrame"></iframe>
+
+    <!-- Quick Pin Color Legend Bar -->
+    <div class="pin-legend-bar">
+      <span class="legend-title">Câblage :</span>
+      <span class="tag-pin tag-vcc">+12V VCC</span>
+      <span class="tag-pin tag-gnd">GND Masse</span>
+      <span class="tag-pin tag-kline">K-Line</span>
+      <span class="tag-pin tag-canh">CAN-H</span>
+      <span class="tag-pin tag-canl">CAN-L</span>
+      <span class="tag-pin tag-boot">BOOT / RST</span>
+      <span class="tag-pin tag-gpt">GPT0 / GPT1</span>
+    </div>
+
+    <!-- WebView Content Frame -->
+    <div class="detail-content-frame">
+      <div class="detail-spinner" id="detailSpinner"></div>
+      <iframe class="detail-iframe" id="detailIframe"></iframe>
     </div>
   </div>
 
   <script>
     (function() {
-      let database = [];
-      let currentCategory = 'ALL';
-      let currentQuery = '';
+      "use strict";
 
+      let allData = [];
+      let filteredData = [];
+      let currentCategory = 'ALL';
+      let currentBrand = 'ALL';
+      let currentQuery = '';
+      let renderedCount = 0;
+      const BATCH_SIZE = 60;
+      let favorites = new Set(JSON.parse(localStorage.getItem('pinout2_favs') || '[]'));
+      let currentDetailItem = null;
+
+      // DOM elements
       const searchInput = document.getElementById('searchInput');
-      const clearBtn = document.getElementById('clearBtn');
-      const resultsGrid = document.getElementById('resultsGrid');
-      const resultsCount = document.getElementById('resultsCount');
-      const categoryChips = document.getElementById('categoryChips');
-      const detailModal = document.getElementById('detailModal');
-      const modalClose = document.getElementById('modalClose');
-      const modalTitle = document.getElementById('modalTitle');
-      const modalFrame = document.getElementById('modalFrame');
-      const modalSpinner = document.getElementById('modalSpinner');
+      const btnClear = document.getElementById('btnClear');
+      const countHeader = document.getElementById('countHeader');
+      const pinoutList = document.getElementById('pinoutList');
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      const favCounterBtn = document.getElementById('favCounterBtn');
+      const categoryBar = document.getElementById('categoryBar');
+      const brandBar = document.getElementById('brandBar');
+
+      const detailScreen = document.getElementById('detailScreen');
+      const btnDetailBack = document.getElementById('btnDetailBack');
+      const detailTitle = document.getElementById('detailTitle');
+      const detailCategory = document.getElementById('detailCategory');
+      const btnDetailFav = document.getElementById('btnDetailFav');
+      const detailIframe = document.getElementById('detailIframe');
+      const detailSpinner = document.getElementById('detailSpinner');
+
+      function updateFavCounter() {
+        favCounterBtn.textContent = `★ ${favorites.size}`;
+        localStorage.setItem('pinout2_favs', JSON.stringify(Array.from(favorites)));
+      }
+      updateFavCounter();
 
       function getRepo(source, path) {
         if (path) {
@@ -394,58 +613,140 @@
         return 'pin-out-2-bench-bsl';
       }
 
-      function getCatClass(source) {
-        if (source === 'cfpm_gbe_auto') return 'cat-cfpm';
-        if (source === 'ktag_instruction') return 'cat-ktag';
-        if (source === 'pcmktm_bench_module71') return 'cat-bench';
-        if (source === 'bsl_bootmode_tricore') return 'cat-boot';
-        if (source === 'hexportal_ecu_connections') return 'cat-hex';
-        return 'cat-dm';
+      function getBadgeClass(source) {
+        if (source === 'cfpm_gbe_auto') return 'badge-cfpm';
+        if (source === 'ktag_instruction') return 'badge-ktag';
+        if (source === 'pcmktm_bench_module71') return 'badge-bench';
+        if (source === 'bsl_bootmode_tricore') return 'badge-boot';
+        if (source === 'hexportal_ecu_connections') return 'badge-hex';
+        return 'badge-dm';
       }
 
-      function renderItems(items) {
-        resultsCount.textContent = items.length + ' calculateurs trouvés';
-        if (items.length === 0) {
-          resultsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748B;">Aucun calculateur correspondant trouvé.</div>';
+      function renderBatch() {
+        const nextBatch = filteredData.slice(renderedCount, renderedCount + BATCH_SIZE);
+        if (nextBatch.length === 0 && renderedCount === 0) {
+          pinoutList.innerHTML = '<div style="text-align:center;padding:50px 20px;color:#64748B;font-size:14px;">Aucun calculateur correspondant trouvé.</div>';
+          loadMoreBtn.style.display = 'none';
           return;
         }
-        const maxDisplay = 150;
-        const slice = items.slice(0, maxDisplay);
-        resultsGrid.innerHTML = slice.map(item => `
-          <div class="item-card" onclick="openDetail(${item.id})">
-            <div class="item-header">
-              <span class="badge-cat ${getCatClass(item.source)}">${item.category}</span>
-              <span class="badge-mcu">${(item.mcus && item.mcus[0]) || ''}</span>
+
+        const fragment = document.createDocumentFragment();
+        nextBatch.forEach(item => {
+          const isFav = favorites.has(item.id);
+          const card = document.createElement('div');
+          card.className = 'item-card';
+          card.innerHTML = `
+            <div class="item-top">
+              <span class="item-badge ${getBadgeClass(item.source)}">${item.category || 'ECU'}</span>
+              ${(item.mcus && item.mcus.length) ? `<span class="item-mcu-badge">${item.mcus[0]}</span>` : ''}
+              <div class="item-spacer"></div>
+              ${item.images_count > 0 ? `<span class="item-img-count">📷 ${item.images_count}</span>` : ''}
+              <span class="item-fav-btn" data-id="${item.id}">${isFav ? '★' : '☆'}</span>
             </div>
             <div class="item-title">${item.title}</div>
-            <div class="item-summary">${item.summary || ''}</div>
-            <div class="item-footer">
-              ${item.images_count > 0 ? `<span>📷 ${item.images_count} image(s)</span>` : ''}
-              ${item.brands && item.brands.length ? `<span>• ${item.brands.slice(0, 2).join(', ')}</span>` : ''}
-            </div>
-          </div>
-        `).join('');
-      }
+            <div class="item-summary">${item.summary || (item.brands ? item.brands.join(', ') : '')}</div>
+          `;
 
-      function applyFilter() {
-        const q = currentQuery.toLowerCase().trim();
-        const filtered = database.filter(item => {
-          if (currentCategory !== 'ALL' && item.source !== currentCategory) return false;
-          if (!q) return true;
-          return (item.tags && item.tags.toLowerCase().includes(q)) ||
-                 (item.title && item.title.toLowerCase().includes(q)) ||
-                 (item.summary && item.summary.toLowerCase().includes(q));
+          // Card click opens detail
+          card.addEventListener('click', (e) => {
+            if (e.target.classList.contains('item-fav-btn')) {
+              e.stopPropagation();
+              toggleFavorite(item.id, e.target);
+              return;
+            }
+            openDetail(item);
+          });
+
+          fragment.appendChild(card);
         });
-        renderItems(filtered);
+
+        if (renderedCount === 0) {
+          pinoutList.innerHTML = '';
+        }
+        pinoutList.appendChild(fragment);
+        renderedCount += nextBatch.length;
+
+        if (renderedCount < filteredData.length) {
+          loadMoreBtn.style.display = 'block';
+          loadMoreBtn.textContent = `Afficher plus (${renderedCount} / ${filteredData.length})...`;
+        } else {
+          loadMoreBtn.style.display = 'none';
+        }
       }
 
-      window.openDetail = function(id) {
-        const item = database.find(x => x.id === id);
-        if (!item) return;
+      function toggleFavorite(id, starEl) {
+        if (favorites.has(id)) {
+          favorites.delete(id);
+          if (starEl) starEl.textContent = '☆';
+        } else {
+          favorites.add(id);
+          if (starEl) starEl.textContent = '★';
+        }
+        updateFavCounter();
+        if (currentDetailItem && currentDetailItem.id === id) {
+          btnDetailFav.textContent = favorites.has(id) ? '★' : '☆';
+        }
+        if (currentCategory === 'FAVORITES') {
+          applyFilters();
+        }
+      }
 
-        modalTitle.textContent = item.title;
-        modalSpinner.style.display = 'block';
-        detailModal.classList.add('open');
+      function applyFilters() {
+        const q = currentQuery.toLowerCase().trim();
+        filteredData = allData.filter(item => {
+          // Category filter
+          if (currentCategory === 'FAVORITES') {
+            if (!favorites.has(item.id)) return false;
+          } else if (currentCategory !== 'ALL' && item.source !== currentCategory) {
+            return false;
+          }
+
+          // Brand filter
+          if (currentBrand !== 'ALL') {
+            const b = currentBrand.toLowerCase();
+            const tags = (item.tags || '').toLowerCase();
+            const title = (item.title || '').toLowerCase();
+            const brandsStr = (item.brands || []).join(' ').toLowerCase();
+            if (!tags.includes(b) && !title.includes(b) && !brandsStr.includes(b)) {
+              return false;
+            }
+          }
+
+          // Query filter
+          if (q) {
+            const tags = (item.tags || '').toLowerCase();
+            const title = (item.title || '').toLowerCase();
+            const summary = (item.summary || '').toLowerCase();
+            if (!tags.includes(q) && !title.includes(q) && !summary.includes(q)) {
+              return false;
+            }
+          }
+
+          return true;
+        });
+
+        countHeader.textContent = `${filteredData.length} calculateur${filteredData.length > 1 ? 's' : ''} trouvé${filteredData.length > 1 ? 's' : ''}`;
+        renderedCount = 0;
+        renderBatch();
+      }
+
+      // Infinite scroll listener
+      window.addEventListener('scroll', () => {
+        if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 400) {
+          if (renderedCount < filteredData.length) {
+            renderBatch();
+          }
+        }
+      });
+      loadMoreBtn.addEventListener('click', renderBatch);
+
+      function openDetail(item) {
+        currentDetailItem = item;
+        detailTitle.textContent = item.title;
+        detailCategory.textContent = item.category;
+        btnDetailFav.textContent = favorites.has(item.id) ? '★' : '☆';
+        detailSpinner.style.display = 'block';
+        detailScreen.classList.add('open');
 
         let cleanPath = item.html || '';
         if (cleanPath.startsWith('extracted/')) cleanPath = cleanPath.substring(10);
@@ -453,8 +754,8 @@
 
         const repo = getRepo(item.source, cleanPath);
         const encodedPath = cleanPath.split('/').map(encodeURIComponent).join('/');
-        
-        // Folder base URL for resolving relative image links
+
+        // Folder base URL
         const lastSlash = cleanPath.lastIndexOf('/');
         const folderPath = lastSlash !== -1 ? cleanPath.substring(0, lastSlash + 1) : '';
         const encodedFolder = folderPath.split('/').map(encodeURIComponent).join('/');
@@ -471,64 +772,94 @@
             return res.text();
           })
           .then(html => {
-            // Normalize image paths
-            let processed = html.replace(/<base[^>]*>/gi, '');
-            
-            // Rewrite all CFPM image links to fast jsDelivr CDN
+            // Strip any hardcoded base tags or local file:/// base tags
+            let processed = html.replace(/<base[^>]*>(?:<\/base>)?/gi, '');
+
+            // Rewrite CFPM images to jsDelivr CDN
             processed = processed.replace(/(?:\.\.\/)+assets\/images\/([^\s"'<>]+)/gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/$1');
             processed = processed.replace(/assets\/images\/([^\s"'<>]+)/gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/$1');
             processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-cfpm-gbe-auto-237\/main\/assets\/images\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/');
 
             const baseTag = `<base href="${cdnFolderUrl}">`;
-            const customCss = `<style>
-              body { background:#071A33 !important; color:#E2E8F0 !important; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif !important; padding:16px !important; line-height:1.6 !important; }
-              img { max-width:100% !important; height:auto !important; border-radius:10px !important; display:block !important; margin:16px auto !important; background:#0D2547 !important; box-shadow:0 4px 20px rgba(0,0,0,0.3) !important; }
-              table { width:100% !important; border-collapse:collapse !important; margin:16px 0 !important; background:#0D2547 !important; border-radius:10px !important; overflow:hidden !important; border:1px solid rgba(180,205,235,0.16) !important; }
-              th, td { padding:10px 14px !important; border:1px solid rgba(180,205,235,0.1) !important; font-size:13.5px !important; }
-              th { background:#123262 !important; color:#38BDF8 !important; font-weight:600 !important; }
+            const customDarkCss = `<style>
+              body { background:#0B1329 !important; color:#F8FAFC !important; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif !important; padding:16px !important; line-height:1.6 !important; margin:0 !important; }
+              h1, h2, h3, h4, h5 { color:#38BDF8 !important; }
+              p, span, div, td, th { color:#CBD5E1; }
+              img { max-width:100% !important; height:auto !important; border-radius:10px !important; display:block !important; margin:16px auto !important; background:#101E36 !important; box-shadow:0 4px 20px rgba(0,0,0,0.4) !important; border:1px solid rgba(255,255,255,0.08) !important; }
+              table { width:100% !important; border-collapse:collapse !important; margin:16px 0 !important; background:#101E36 !important; border-radius:10px !important; overflow:hidden !important; border:1px solid rgba(255,255,255,0.08) !important; }
+              th, td { padding:10px 14px !important; border:1px solid rgba(255,255,255,0.06) !important; font-size:13.5px !important; }
+              th { background:#162644 !important; color:#38BDF8 !important; font-weight:700 !important; }
               .texter, div[id^='a'], div[id^='b'], div[id^='c'] { display:block !important; }
               a { color:#38BDF8 !important; }
             </style><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">`;
 
             if (processed.includes('<head>')) {
-              processed = processed.replace('<head>', '<head>' + baseTag + customCss);
+              processed = processed.replace('<head>', '<head>' + baseTag + customDarkCss);
             } else {
-              processed = '<head>' + baseTag + customCss + '</head>' + processed;
+              processed = '<head>' + baseTag + customDarkCss + '</head>' + processed;
             }
 
-            modalFrame.srcdoc = processed;
-            modalSpinner.style.display = 'none';
+            detailIframe.srcdoc = processed;
+            detailSpinner.style.display = 'none';
           })
           .catch(err => {
-            modalSpinner.style.display = 'none';
-            modalFrame.srcdoc = `<body style="background:#071A33;color:#EF4444;font-family:sans-serif;padding:30px;text-align:center;"><h3>Erreur de chargement</h3><p>Impossible de charger le schéma (${err.message})</p></body>`;
+            detailSpinner.style.display = 'none';
+            detailIframe.srcdoc = `<body style="background:#0B1329;color:#EF4444;font-family:sans-serif;padding:30px;text-align:center;"><h3>Erreur de chargement</h3><p>Impossible de charger le schéma (${err.message})</p></body>`;
           });
+      }
+
+      btnDetailBack.onclick = () => {
+        detailScreen.classList.remove('open');
+        detailIframe.srcdoc = '';
+        currentDetailItem = null;
       };
 
-      modalClose.onclick = function() {
-        detailModal.classList.remove('open');
-        modalFrame.srcdoc = '';
+      btnDetailFav.onclick = () => {
+        if (currentDetailItem) {
+          toggleFavorite(currentDetailItem.id);
+          btnDetailFav.textContent = favorites.has(currentDetailItem.id) ? '★' : '☆';
+        }
       };
 
-      searchInput.addEventListener('input', function(e) {
+      favCounterBtn.onclick = () => {
+        document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
+        const favChip = document.querySelector('.chip-fav');
+        if (favChip) favChip.classList.add('active');
+        currentCategory = 'FAVORITES';
+        applyFilters();
+      };
+
+      // Search input listener
+      searchInput.addEventListener('input', (e) => {
         currentQuery = e.target.value;
-        clearBtn.style.display = currentQuery ? 'block' : 'none';
-        applyFilter();
+        btnClear.style.display = currentQuery ? 'block' : 'none';
+        applyFilters();
       });
 
-      clearBtn.addEventListener('click', function() {
+      btnClear.addEventListener('click', () => {
         searchInput.value = '';
         currentQuery = '';
-        clearBtn.style.display = 'none';
-        applyFilter();
+        btnClear.style.display = 'none';
+        applyFilters();
       });
 
-      categoryChips.addEventListener('click', function(e) {
-        if (e.target.classList.contains('chip')) {
-          document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      // Categories chip bar listener
+      categoryBar.addEventListener('click', (e) => {
+        if (e.target.classList.contains('chip-btn')) {
+          document.querySelectorAll('.chip-btn').forEach(c => c.classList.remove('active'));
           e.target.classList.add('active');
           currentCategory = e.target.dataset.cat;
-          applyFilter();
+          applyFilters();
+        }
+      });
+
+      // Brands bar listener
+      brandBar.addEventListener('click', (e) => {
+        if (e.target.classList.contains('brand-btn')) {
+          document.querySelectorAll('.brand-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          currentBrand = e.target.dataset.brand;
+          applyFilters();
         }
       });
 
@@ -542,11 +873,11 @@
         .catch(() => fetch(rawIndexUrl))
         .then(res => res.json())
         .then(data => {
-          database = data;
-          applyFilter();
+          allData = data;
+          applyFilters();
         })
         .catch(err => {
-          resultsCount.textContent = 'Erreur lors du chargement de la base : ' + err.message;
+          countHeader.textContent = 'Erreur lors du chargement de la base de données : ' + err.message;
         });
     })();
   </script>
