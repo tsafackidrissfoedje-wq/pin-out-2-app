@@ -775,12 +775,16 @@
             // Strip any hardcoded base tags or local file:/// base tags
             let processed = html.replace(/<base[^>]*>(?:<\/base>)?/gi, '');
 
-            // Rewrite CFPM images to jsDelivr CDN
-            processed = processed.replace(/(?:\.\.\/)+assets\/images\/([^\s"'<>]+)/gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/$1');
-            processed = processed.replace(/assets\/images\/([^\s"'<>]+)/gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/$1');
+            // Robust and exact replacement for CFPM images:
+            // Match any relative src pointing to assets/images
+            processed = processed.replace(/src=["'](?:(?:\.\.\/)*assets\/images\/)([^"'\s>]+)["']/gi, 'src="https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/$1"');
+            
+            // Replace any raw.githubusercontent CFPM links to fast jsDelivr CDN
             processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-cfpm-gbe-auto-237\/main\/assets\/images\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/');
 
-            const baseTag = `<base href="${cdnFolderUrl}">`;
+            // For KTAG, Bench 71, Boot Tricore, HexPortal, DM -> inject CDN base tag
+            const baseTag = (item.source !== 'cfpm_gbe_auto') ? `<base href="${cdnFolderUrl}">` : '';
+            
             const customDarkCss = `<style>
               body { background:#0B1329 !important; color:#F8FAFC !important; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif !important; padding:16px !important; line-height:1.6 !important; margin:0 !important; }
               h1, h2, h3, h4, h5 { color:#38BDF8 !important; }
