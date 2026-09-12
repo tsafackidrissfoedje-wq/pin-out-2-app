@@ -781,23 +781,37 @@
             
             // Replace any raw.githubusercontent CFPM links to fast jsDelivr CDN
             processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-cfpm-gbe-auto-237\/main\/assets\/images\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/');
-
-            // Fast jsDelivr CDN link optimization for K-TAG images
+            // Fast jsDelivr CDN link optimization for K-TAG and Bench-BSL images
             processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-2-ktag\/main\/ktag_instruction\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-2-ktag@main/ktag_instruction/');
+            processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-2-bench-bsl\/main\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-2-bench-bsl@main/');
 
-            // Fallback: If any relative image remains in K-TAG, resolve directly to CDN / raw
-            if (repo === 'pin-out-2-ktag') {
-              processed = processed.replace(/src=["'](?!https?:\/\/|data:)(?:img\/)?([^"'\s>]+)["']/gi, `src="https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-2-ktag@main/${encodedFolder}$1" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='https://raw.githubusercontent.com/tsafackidrissfoedje-wq/pin-out-2-ktag/main/${folderPath}$1';}"`);
-            }
+            // Universal fallback: If any relative image remains in any repo (K-TAG, Bench-BSL, etc.), resolve directly to CDN / raw
+            processed = processed.replace(/src=["'](?!https?:\/\/|data:|blob:)(?:img\/)?([^"'\s>]+)["']/gi, function(match, fname) {
+              if (fname.indexOf('btn_') !== -1 || fname.indexOf('header_bg') !== -1) {
+                return 'src="" style="display:none !important;"';
+              }
+              const cleanF = fname.replace(/^\.\//, '');
+              const cdnTarget = `https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/${repo}@main/${encodedFolder}${encodeURIComponent(cleanF)}`;
+              const rawTarget = `https://raw.githubusercontent.com/tsafackidrissfoedje-wq/${repo}/main/${folderPath}${cleanF}`;
+              return `src="${cdnTarget}" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='${rawTarget}';}"`;
+            });
 
             // Auto-expand all K-TAG and manual accordions
             processed = processed.replace(/\.texter\s*\{display:none\}/gi, '.texter {display:block !important;}');
+
+            // Clean legacy Help&Manual styles (overflow:hidden)
+            processed = processed.replace(/overflow\s*:\s*hidden/gi, 'overflow: visible');
 
             // For KTAG, Bench 71, Boot Tricore, HexPortal, DM -> inject CDN base tag
             const baseTag = (item.source !== 'cfpm_gbe_auto') ? `<base href="${cdnFolderUrl}">` : '';
             
             const customDarkCss = `<style>
-              body { background:#0B1329 !important; color:#F8FAFC !important; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif !important; padding:16px !important; line-height:1.6 !important; margin:0 !important; }
+              body { background:#0B1329 !important; color:#F8FAFC !important; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif !important; padding:16px !important; line-height:1.6 !important; margin:0 !important; overflow:visible !important; overflow-y:auto !important; height:auto !important; }
+              #idheader { display:none !important; }
+              #printheader { display:block !important; margin:0 0 16px 0 !important; }
+              #printheader h1 { color:#38BDF8 !important; font-size:1.25rem !important; text-align:center !important; }
+              table[style*="#9CBEDC"], table[bgcolor="#9CBEDC"] { background:#101E36 !important; border-radius:8px !important; }
+              td[style*="text-align:right"], td[align="right"] { display:none !important; }
               h1, h2, h3, h4, h5 { color:#38BDF8 !important; }
               p, span, div, td, th { color:#CBD5E1; }
               img { max-width:100% !important; height:auto !important; border-radius:10px !important; display:block !important; margin:16px auto !important; background:#101E36 !important; box-shadow:0 4px 20px rgba(0,0,0,0.4) !important; border:1px solid rgba(255,255,255,0.08) !important; }
