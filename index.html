@@ -878,20 +878,64 @@
         }
       });
 
-      // Load Index
-      const localUrl = './pinout_app_index.json';
+      // Robust multi-source loader (Local XHR for WebView assets -> Local Fetch -> jsDelivr CDN -> Raw GitHub)
       const cdnIndexUrl = 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-2-app@main/pinout_app_index.json';
       const rawIndexUrl = 'https://raw.githubusercontent.com/tsafackidrissfoedje-wq/pin-out-2-app/main/pinout_app_index.json';
 
-      fetch(localUrl)
-        .catch(() => fetch(cdnIndexUrl))
-        .catch(() => fetch(rawIndexUrl))
-        .then(res => res.json())
-        .then(data => {
+      function loadPinoutDatabase() {
+        return new Promise(function(resolve, reject) {
+          try {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', './pinout_app_index.json', true);
+            xhr.onload = function() {
+              if (xhr.status === 200 || (xhr.status === 0 && xhr.responseText && xhr.responseText.length > 100)) {
+                try {
+                  var data = JSON.parse(xhr.responseText);
+                  if (data && data.length > 0) {
+                    resolve(data);
+                    return;
+                  }
+                } catch(e) {}
+              }
+              tryFetchLocal();
+            };
+            xhr.onerror = tryFetchLocal;
+            xhr.ontimeout = tryFetchLocal;
+            xhr.timeout = 2500;
+            xhr.send();
+          } catch(e) {
+            tryFetchLocal();
+          }
+
+          function tryFetchLocal() {
+            fetch('./pinout_app_index.json')
+              .then(function(r) { return r.json(); })
+              .then(resolve)
+              .catch(tryCdn);
+          }
+
+          function tryCdn() {
+            fetch(cdnIndexUrl)
+              .then(function(r) { return r.json(); })
+              .then(resolve)
+              .catch(tryRaw);
+          }
+
+          function tryRaw() {
+            fetch(rawIndexUrl)
+              .then(function(r) { return r.json(); })
+              .then(resolve)
+              .catch(reject);
+          }
+        });
+      }
+
+      loadPinoutDatabase()
+        .then(function(data) {
           allData = data;
           applyFilters();
         })
-        .catch(err => {
+        .catch(function(err) {
           countHeader.textContent = 'Erreur lors du chargement de la base de données : ' + err.message;
         });
     })();
