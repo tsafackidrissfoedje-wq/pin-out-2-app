@@ -767,12 +767,24 @@
         const rawUrl = `https://raw.githubusercontent.com/tsafackidrissfoedje-wq/${repo}/main/${encodedPath}`;
         const cdnUrl = `https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/${repo}@main/${encodedPath}`;
 
-        fetch(cdnUrl)
-          .catch(() => fetch(rawUrl))
-          .then(res => {
-            if (!res.ok) throw new Error('HTTP ' + res.status);
-            return res.text();
-          })
+        function fetchSchemaText() {
+          return fetch(cdnUrl)
+            .then(res => {
+              if (res.ok) return res.text();
+              return fetch(rawUrl).then(r2 => {
+                if (!r2.ok) throw new Error('HTTP ' + r2.status);
+                return r2.text();
+              });
+            })
+            .catch(() => {
+              return fetch(rawUrl).then(r2 => {
+                if (!r2.ok) throw new Error('HTTP ' + r2.status);
+                return r2.text();
+              });
+            });
+        }
+
+        fetchSchemaText()
           .then(html => {
             // Strip any hardcoded base tags or local file:/// base tags
             let processed = html.replace(/<base[^>]*>(?:<\/base>)?/gi, '');
