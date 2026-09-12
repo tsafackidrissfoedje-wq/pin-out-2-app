@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-  <title>PIN OUT 2 — ECU & TCU Pinout Master Database (3 747 calculateurs)</title>
+  <title>PIN OUT 2 — ECU & TCU Pinout Master Database (3 880 calculateurs)</title>
   <meta name="description" content="Application officielle PIN OUT 2 - Base de données calculateurs, schémas de connexion et brochages professionnels">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -495,7 +495,8 @@
 
     <!-- Categories Horizontal Scroll Bar matching activity_main.xml -->
     <div class="scroll-row" id="categoryBar">
-      <button class="chip-btn active" data-cat="ALL">Tous (3747)</button>
+      <button class="chip-btn active" data-cat="ALL">Tous (3880)</button>
+      <button class="chip-btn" data-cat="multican_ecu_service">MultiCAN (133)</button>
       <button class="chip-btn" data-cat="cfpm_gbe_auto">CFPM GBE (934)</button>
       <button class="chip-btn" data-cat="ktag_instruction">K-TAG (1987)</button>
       <button class="chip-btn" data-cat="pcmktm_bench_module71">Bench Mod 71 (174)</button>
@@ -603,11 +604,11 @@
         if (path) {
           const p = path.toLowerCase();
           if (p.startsWith('assets/images') || p.includes('assets/images')) return 'pin-out-cfpm-gbe-auto-237';
-          if (p.startsWith('bsl_bootmode_tricore') || p.startsWith('pcmktm_bench_module71') || p.startsWith('cfpm_pinouts')) return 'pin-out-2-bench-bsl';
+          if (p.startsWith('bsl_bootmode_tricore') || p.startsWith('pcmktm_bench_module71') || p.startsWith('cfpm_pinouts') || p.startsWith('multican_ecu_service')) return 'pin-out-2-bench-bsl';
           if (p.startsWith('dm_bosch_siemens_marelli') || p.startsWith('hexportal_ecu_connections')) return 'pin-out-2-hexportal-dm';
           if (p.startsWith('ktag_instruction')) return 'pin-out-2-ktag';
         }
-        if (source === 'bsl_bootmode_tricore' || source === 'pcmktm_bench_module71' || source === 'cfpm_gbe_auto') return 'pin-out-2-bench-bsl';
+        if (source === 'bsl_bootmode_tricore' || source === 'pcmktm_bench_module71' || source === 'cfpm_gbe_auto' || source === 'multican_ecu_service') return 'pin-out-2-bench-bsl';
         if (source === 'dm_bosch_siemens_marelli' || source === 'hexportal_ecu_connections') return 'pin-out-2-hexportal-dm';
         if (source === 'ktag_instruction') return 'pin-out-2-ktag';
         return 'pin-out-2-bench-bsl';
@@ -615,6 +616,7 @@
 
       function getBadgeClass(source) {
         if (source === 'cfpm_gbe_auto') return 'badge-cfpm';
+        if (source === 'multican_ecu_service') return 'badge-bench';
         if (source === 'ktag_instruction') return 'badge-ktag';
         if (source === 'pcmktm_bench_module71') return 'badge-bench';
         if (source === 'bsl_bootmode_tricore') return 'badge-boot';
