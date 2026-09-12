@@ -782,6 +782,17 @@
             // Replace any raw.githubusercontent CFPM links to fast jsDelivr CDN
             processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-cfpm-gbe-auto-237\/main\/assets\/images\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-cfpm-gbe-auto-237@main/assets/images/');
 
+            // Fast jsDelivr CDN link optimization for K-TAG images
+            processed = processed.replace(/https:\/\/raw\.githubusercontent\.com\/tsafackidrissfoedje-wq\/pin-out-2-ktag\/main\/ktag_instruction\//gi, 'https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-2-ktag@main/ktag_instruction/');
+
+            // Fallback: If any relative image remains in K-TAG, resolve directly to CDN / raw
+            if (repo === 'pin-out-2-ktag') {
+              processed = processed.replace(/src=["'](?!https?:\/\/|data:)(?:img\/)?([^"'\s>]+)["']/gi, `src="https://cdn.jsdelivr.net/gh/tsafackidrissfoedje-wq/pin-out-2-ktag@main/${encodedFolder}$1" onerror="if(!this.dataset.retry){this.dataset.retry=1;this.src='https://raw.githubusercontent.com/tsafackidrissfoedje-wq/pin-out-2-ktag/main/${folderPath}$1';}"`);
+            }
+
+            // Auto-expand all K-TAG and manual accordions
+            processed = processed.replace(/\.texter\s*\{display:none\}/gi, '.texter {display:block !important;}');
+
             // For KTAG, Bench 71, Boot Tricore, HexPortal, DM -> inject CDN base tag
             const baseTag = (item.source !== 'cfpm_gbe_auto') ? `<base href="${cdnFolderUrl}">` : '';
             
@@ -793,12 +804,12 @@
               table { width:100% !important; border-collapse:collapse !important; margin:16px 0 !important; background:#101E36 !important; border-radius:10px !important; overflow:hidden !important; border:1px solid rgba(255,255,255,0.08) !important; }
               th, td { padding:10px 14px !important; border:1px solid rgba(255,255,255,0.06) !important; font-size:13.5px !important; }
               th { background:#162644 !important; color:#38BDF8 !important; font-weight:700 !important; }
-              .texter, div[id^='a'], div[id^='b'], div[id^='c'] { display:block !important; }
+              .texter, div[id^='a'], div[id^='b'], div[id^='c'], div[id^='d'] { display:block !important; }
               a { color:#38BDF8 !important; }
             </style><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">`;
 
-            if (processed.includes('<head>')) {
-              processed = processed.replace('<head>', '<head>' + baseTag + customDarkCss);
+            if (/<head[^>]*>/i.test(processed)) {
+              processed = processed.replace(/<head[^>]*>/i, (m) => m + baseTag + customDarkCss);
             } else {
               processed = '<head>' + baseTag + customDarkCss + '</head>' + processed;
             }
